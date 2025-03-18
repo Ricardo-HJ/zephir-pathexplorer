@@ -3,14 +3,26 @@
 import { useActionState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 import { login } from "../actions/auth"
 import { Loader2 } from "lucide-react"
 
 export default function LoginPage() {
-  const [state, formAction, isPending] = useActionState(login, {
+  const router = useRouter()
+  const [state, formAction, isPending] = useActionState(
+    login, {
     success: false,
     message: "",
+    redirectTo: "",
   })
+
+  // Handle redirection after successful login
+  useEffect(() => {
+    if (state.success && state.redirectTo) {
+      router.push(state.redirectTo)
+    }
+  }, [state, router])
 
   return (
     <div className="flex h-screen">
@@ -59,7 +71,7 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="••••••••"
+                placeholder=""
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 required
                 disabled={isPending}

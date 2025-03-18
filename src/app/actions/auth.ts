@@ -34,8 +34,13 @@ export async function login(prevState: any, formData: FormData) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ correo, contraseña }),
+      body: JSON.stringify({ 
+        correo: correo, 
+        contraseña: contraseña 
+      }),
     })
+
+    console.log("Login response:", response.status)
 
     const data: LoginResponse = await response.json()
 
@@ -66,15 +71,12 @@ export async function login(prevState: any, formData: FormData) {
         path: "/",
         ...(rememberMe ? { maxAge: 30 * 24 * 60 * 60 } : {}),
       })
-
-      // Redirect based on user type
-      const redirectPath = data.user.tipoUsuario === "admin" ? "/admin/dashboard" : "/dashboard"
-      redirect(redirectPath)
     }
 
     return {
       success: true,
       message: "Inicio de sesión exitoso",
+      redirectTo: data.user?.tipoUsuario === "admin" ? "/admin/dashboard" : "/dashboard",
     }
   } catch (error) {
     console.error("Login error:", error)
