@@ -1,7 +1,17 @@
+"use client"
+
+import { useActionState } from "react"
 import Image from "next/image"
 import Link from "next/link"
+import { login } from "../actions/auth"
+import { Loader2 } from "lucide-react"
 
 export default function LoginPage() {
+  const [state, formAction, isPending] = useActionState(login, {
+    success: false,
+    message: "",
+  })
+
   return (
     <div className="flex h-screen">
       {/* Left side - Login form */}
@@ -17,7 +27,15 @@ export default function LoginPage() {
           <p className="text-center text-gray-600 mb-10">Porfavor Ingresa tus Datos</p>
 
           {/* Login form */}
-          <form className="space-y-6">
+          <form className="space-y-6" action={formAction}>
+            {state.message && (
+              <div
+                className={`p-3 rounded-md ${state.success ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"}`}
+              >
+                {state.message}
+              </div>
+            )}
+
             <div className="space-y-2">
               <label htmlFor="email" className="block text-sm font-medium text-gray-700">
                 Correo
@@ -26,9 +44,10 @@ export default function LoginPage() {
                 id="email"
                 name="email"
                 type="email"
-                placeholder="Placeholder"
+                placeholder="correo@ejemplo.com"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 required
+                disabled={isPending}
               />
             </div>
 
@@ -40,9 +59,10 @@ export default function LoginPage() {
                 id="password"
                 name="password"
                 type="password"
-                placeholder="Placeholder"
+                placeholder="••••••••"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 required
+                disabled={isPending}
               />
             </div>
 
@@ -53,6 +73,7 @@ export default function LoginPage() {
                   name="remember-me"
                   type="checkbox"
                   className="h-4 w-4 border-gray-300 rounded"
+                  disabled={isPending}
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
                   Mantener sesión
@@ -68,9 +89,17 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              className="w-full py-3 px-4 bg-accenture-dark text-white font-medium rounded-md hover:bg-accenture-dark/90"
+              disabled={isPending}
+              className="w-full py-3 px-4 bg-accenture-dark text-white font-medium rounded-md hover:bg-accenture-dark/90 flex justify-center items-center"
             >
-              Iniciar sesión
+              {isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Iniciando sesión...
+                </>
+              ) : (
+                "Iniciar sesión"
+              )}
             </button>
           </form>
         </div>
@@ -79,13 +108,7 @@ export default function LoginPage() {
       {/* Right side - Image with overlay */}
       <div className="hidden md:block md:w-1/2 relative">
         <div className="absolute inset-0 bg-gradient-to-l from-black/70 to-black/40 z-10"></div>
-        <Image
-          src="/accenture-bg.png"
-          alt="Accenture Building"
-          fill
-          className="object-cover"
-          priority
-        />
+        <Image src="/accenture-bg.png" alt="Accenture Building" fill className="object-cover" priority />
       </div>
     </div>
   )
