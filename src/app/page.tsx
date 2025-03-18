@@ -1,10 +1,11 @@
-import cookie from "js-cookie"
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
 export default async function Home() {
   // Check if user is authenticated
-  const authToken = cookie.get("auth_token")
-  const userType = cookie.get("user_type")
+  const cookieStore = await cookies()
+  const authToken = cookieStore.get("auth_token")?.value
+  const userType = cookieStore.get("user_type")?.value
 
   if (!authToken) {
     // If not authenticated, redirect to login

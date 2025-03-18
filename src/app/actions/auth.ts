@@ -1,6 +1,6 @@
 "use server"
 
-import cookies from "js-cookie"
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
 interface LoginResponse {
@@ -34,9 +34,9 @@ export async function login(prevState: any, formData: FormData) {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ 
-        correo: correo, 
-        contraseña: contraseña 
+      body: JSON.stringify({
+        correo: correo,
+        contraseña: contraseña,
       }),
     })
 
@@ -53,30 +53,37 @@ export async function login(prevState: any, formData: FormData) {
 
     if (data.token && data.user) {
       // Set the token in cookies
-      const cookieOptions = {
+      const cookieStore = await cookies()
+
+      // Calculate expiry if remember me is checked (30 days in seconds)
+      const maxAge = rememberMe ? 30 * 24 * 60 * 60 : undefined
+
+      cookieStore.set("auth_token", data.token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax" as const,
+        sameSite: "lax",
         path: "/",
-        // If remember me is checked, set expiry to 30 days, otherwise session cookie
-        ...(rememberMe ? { maxAge: 30 * 24 * 60 * 60 } : {}),
-      }
-
-      cookies.set("auth_token", data.token, cookieOptions)
+        maxAge,
+      })
 
       // Store user type in a separate cookie for client-side access
-      cookies.set("user_type", data.user.tipoUsuario, {
+      cookieStore.set("user_type", data.user.tipoUsuario, {
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax" as const,
+        sameSite: "lax",
         path: "/",
-        ...(rememberMe ? { maxAge: 30 * 24 * 60 * 60 } : {}),
+        maxAge,
       })
+
+      return {
+        success: true,
+        message: "Inicio de sesión exitoso",
+        redirectTo: data.user?.tipoUsuario === "admin" ? "/admin/dashboard" : "/dashboard",
+      }
     }
 
     return {
-      success: true,
-      message: "Inicio de sesión exitoso",
-      redirectTo: data.user?.tipoUsuario === "admin" ? "/admin/dashboard" : "/dashboard",
+      success: false,
+      message: "Error al iniciar sesión",
     }
   } catch (error) {
     console.error("Login error:", error)
@@ -88,8 +95,9 @@ export async function login(prevState: any, formData: FormData) {
 }
 
 export async function logout() {
-  cookies.remove("auth_token")
-  cookies.remove("user_type")
+  const cookieStore = await cookies()
+  cookieStore.delete("auth_token")
+  cookieStore.delete("user_type")
   redirect("/login")
 }
 

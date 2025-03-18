@@ -1,4 +1,4 @@
-import cookies from "js-cookie"
+import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 
 interface User {
@@ -8,7 +8,8 @@ interface User {
 }
 
 export async function getCurrentUser(): Promise<User | null> {
-  const authToken = cookies.get("auth_token")
+  const cookieStore = await cookies()
+  const authToken = cookieStore.get("auth_token")?.value
 
   if (!authToken) {
     return null
@@ -25,8 +26,9 @@ export async function getCurrentUser(): Promise<User | null> {
     if (!response.ok) {
       if (response.status === 401) {
         // Token is invalid or expired
-        cookies.remove("auth_token")
-        cookies.remove("user_type")
+        const cookieStore = await cookies()
+        cookieStore.delete("auth_token")
+        cookieStore.delete("user_type")
         return null
       }
       throw new Error("Failed to fetch user")

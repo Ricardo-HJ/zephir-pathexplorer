@@ -1,10 +1,12 @@
-import cookie from "js-cookie"
-import { NextResponse } from "next/server"
+import { cookies } from "next/headers"
+import { NextResponse, type NextRequest } from "next/server"
 
-export async function GET() {
-  cookie.remove("auth_token")
-  cookie.remove("user_type")
+export async function GET(request: NextRequest) {
+  const cookieStore = await cookies()
+  cookieStore.delete("auth_token")
+  cookieStore.delete("user_type")
 
-  return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"))
+  // Use a relative URL for redirection instead of constructing a new URL
+  return NextResponse.redirect(new URL("/login", request.url))
 }
 
