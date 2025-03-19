@@ -5,13 +5,12 @@ import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect } from "react"
-import { login } from "../actions/auth"
+import { login } from "@/app/actions/auth"
 import { Loader2 } from "lucide-react"
 
 export default function LoginPage() {
   const router = useRouter()
-  const [state, formAction, isPending] = useActionState(
-    login, {
+  const [state, formAction, isPending] = useActionState(login, {
     success: false,
     message: "",
     redirectTo: "",

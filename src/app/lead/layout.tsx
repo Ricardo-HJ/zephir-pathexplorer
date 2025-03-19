@@ -4,12 +4,12 @@ import { redirect } from "next/navigation"
 import { AppSidebar } from "@/components/layout/sidebar"
 import { UserRoleProvider } from "@/components/providers/user-role-provider"
 
-export default async function SharedLayout({
+export default async function LeadLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  // Check if user is authenticated
+  // Check if user is authenticated and is a lead
   const cookieStore = await cookies()
   const authToken = cookieStore.get("auth_token")?.value
   const userType = cookieStore.get("user_type")?.value
@@ -18,8 +18,12 @@ export default async function SharedLayout({
     redirect("/login")
   }
 
+  if (userType !== "lead") {
+    redirect("/dashboard") // Will be handled by the appropriate role group
+  }
+
   return (
-    <UserRoleProvider initialRole={userType || undefined}>
+    <UserRoleProvider initialRole="lead">
       <div className="flex min-h-screen">
         <AppSidebar />
         <main className="flex-1 pl-16 pt-14">

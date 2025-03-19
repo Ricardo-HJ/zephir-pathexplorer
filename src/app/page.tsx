@@ -13,10 +13,18 @@ export default async function Home() {
   }
 
   // If authenticated, redirect based on user type
-  if (userType === "admin") {
-    redirect("/admin/dashboard")
-  } else {
-    redirect("/dashboard")
+  switch (userType) {
+    case "admin":
+      redirect("/admin/dashboard")
+      break
+    case "lead":
+      redirect("/lead/dashboard")
+      break
+    case "employee":
+      redirect("/employee/dashboard")
+      break
+    default:
+      redirect("/login")
   }
 }
 

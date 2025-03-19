@@ -77,7 +77,7 @@ export async function login(prevState: any, formData: FormData) {
       return {
         success: true,
         message: "Inicio de sesión exitoso",
-        redirectTo: data.user?.tipoUsuario === "admin" ? "/admin/dashboard" : "/dashboard",
+        redirectTo: "/dashboard", // Now handled by route groups
       }
     }
 

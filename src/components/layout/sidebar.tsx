@@ -1,58 +1,77 @@
 "use client"
 
 import * as React from "react"
-import { Home, Users, BarChart3, Settings, HelpCircle, Mail, Calendar, FileText } from "lucide-react"
+import { Home, Users, Settings, FileText, User, MessageSquare } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { cn } from "../lib/utils"
+import { cn } from "@/lib/utils"
+import { useUserRole } from "@/hooks/useUserRole"
 
 export function AppSidebar() {
   const [isExpanded, setIsExpanded] = React.useState(false)
   const pathname = usePathname()
+  const { role } = useUserRole()
 
-  // Navigation items with icons and labels
-  const navItems = [
-    {
-      title: "Dashboard",
-      icon: Home,
-      href: "/dashboard",
-    },
-    {
-      title: "Users",
-      icon: Users,
-      href: "/users",
-    },
-    {
-      title: "Analytics",
-      icon: BarChart3,
-      href: "/analytics",
-    },
-    {
-      title: "Messages",
-      icon: Mail,
-      href: "/messages",
-    },
-    {
-      title: "Calendar",
-      icon: Calendar,
-      href: "/calendar",
-    },
-    {
-      title: "Documents",
-      icon: FileText,
-      href: "/documents",
-    },
-    {
-      title: "Settings",
-      icon: Settings,
-      href: "/settings",
-    },
-    {
-      title: "Help",
-      icon: HelpCircle,
-      href: "/help",
-    },
-  ]
+  // Define navigation items based on user role
+  const getNavItems = () => {
+    // Base navigation items for all users
+    const sharedItems = [
+      {
+        title: "Dashboard",
+        icon: Home,
+        href: `/${role}/dashboard`,
+      },
+      {
+        title: "Mensajes",
+        icon: MessageSquare,
+        href: "/shared/messages",
+      },
+      {
+        title: "Perfil",
+        icon: User,
+        href: "/shared/profile",
+      },
+      {
+        title: "Configuración",
+        icon: Settings,
+        href: "/shared/settings",
+      },
+    ]
+
+    // Role-specific items
+    if (role === "admin") {
+      return [
+        ...sharedItems,
+        {
+          title: "Usuarios",
+          icon: Users,
+          href: "/admin/users",
+        },
+      ]
+    } else if (role === "lead") {
+      return [
+        ...sharedItems,
+        {
+          title: "Equipo",
+          icon: Users,
+          href: "/lead/team",
+        },
+      ]
+    } else if (role === "employee") {
+      return [
+        ...sharedItems,
+        {
+          title: "Tareas",
+          icon: FileText,
+          href: "/employee/tasks",
+        },
+      ]
+    }
+
+    return sharedItems
+  }
+
+  const navItems = getNavItems()
 
   return (
     <aside
@@ -70,16 +89,14 @@ export function AppSidebar() {
             isExpanded ? "justify-start px-4" : "justify-center",
           )}
         >
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-            A
-          </div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-accenture-purple text-white">A</div>
           <span
             className={cn(
               "ml-2 font-semibold transition-opacity duration-300",
               isExpanded ? "opacity-100" : "opacity-0",
             )}
           >
-            App Name
+            Zephir HR
           </span>
         </div>
       </div>
@@ -95,7 +112,7 @@ export function AppSidebar() {
               className={cn(
                 "group flex h-10 items-center rounded-md px-2 text-sm font-medium transition-colors",
                 isActive
-                  ? "bg-primary text-primary-foreground"
+                  ? "bg-accenture-purple text-white"
                   : "text-muted-foreground hover:bg-accent hover:text-accent-foreground",
               )}
             >
@@ -111,7 +128,7 @@ export function AppSidebar() {
 
               {/* Tooltip for icon-only mode */}
               {!isExpanded && (
-                <div className="absolute left-full ml-2 rounded bg-primary px-2 py-1 text-xs font-medium text-primary-foreground opacity-0 shadow transition-opacity group-hover:opacity-100">
+                <div className="absolute left-full ml-2 rounded bg-accenture-purple px-2 py-1 text-xs font-medium text-white opacity-0 shadow transition-opacity group-hover:opacity-100">
                   {item.title}
                 </div>
               )}
