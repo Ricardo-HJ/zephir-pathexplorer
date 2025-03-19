@@ -15,11 +15,7 @@ export default async function AdminLayout({
   const userType = cookieStore.get("user_type")?.value
 
   if (!authToken) {
-    redirect("/login")
-  }
-
-  if (userType !== "admin") {
-    redirect("/dashboard") // Will be handled by the appropriate role group
+    redirect("/")
   }
 
   return (

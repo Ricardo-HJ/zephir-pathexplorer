@@ -15,7 +15,7 @@ export default async function SharedLayout({
   const userType = cookieStore.get("user_type")?.value
 
   if (!authToken) {
-    redirect("/login")
+    redirect("/")
   }
 
   return (

@@ -11,7 +11,7 @@ export function LogoutButton() {
     document.cookie = "user_type=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
 
     // Navigate to login page
-    router.push("/login")
+    router.push("/")
   }
 
   return (

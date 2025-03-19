@@ -46,7 +46,7 @@ export async function requireAuth() {
   const user = await getCurrentUser()
 
   if (!user) {
-    redirect("/login")
+    redirect("/")
   }
 
   return user
@@ -56,11 +56,60 @@ export async function requireAdmin() {
   const user = await getCurrentUser()
 
   if (!user) {
-    redirect("/login")
+    redirect("/")
   }
 
   if (user.tipoUsuario !== "admin") {
-    redirect("/dashboard")
+    // Redirect to appropriate dashboard based on user type
+    if (user.tipoUsuario === "lead") {
+      redirect("/lead/dashboard")
+    } else if (user.tipoUsuario === "employee") {
+      redirect("/employee/dashboard")
+    } else {
+      redirect("/")
+    }
+  }
+
+  return user
+}
+
+export async function requireLead() {
+  const user = await getCurrentUser()
+
+  if (!user) {
+    redirect("/")
+  }
+
+  if (user.tipoUsuario !== "lead") {
+    // Redirect to appropriate dashboard based on user type
+    if (user.tipoUsuario === "admin") {
+      redirect("/admin/dashboard")
+    } else if (user.tipoUsuario === "employee") {
+      redirect("/employee/dashboard")
+    } else {
+      redirect("/")
+    }
+  }
+
+  return user
+}
+
+export async function requireEmployee() {
+  const user = await getCurrentUser()
+
+  if (!user) {
+    redirect("/")
+  }
+
+  if (user.tipoUsuario !== "employee") {
+    // Redirect to appropriate dashboard based on user type
+    if (user.tipoUsuario === "admin") {
+      redirect("/admin/dashboard")
+    } else if (user.tipoUsuario === "lead") {
+      redirect("/lead/dashboard")
+    } else {
+      redirect("/")
+    }
   }
 
   return user

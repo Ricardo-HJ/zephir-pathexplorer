@@ -7,6 +7,6 @@ export async function GET(request: NextRequest) {
   cookieStore.delete("user_type")
 
   // Use a relative URL for redirection instead of constructing a new URL
-  return NextResponse.redirect(new URL("/login", request.url))
+  return NextResponse.redirect(new URL("/", request.url))
 }
 

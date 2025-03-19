@@ -77,7 +77,7 @@ export async function login(prevState: any, formData: FormData) {
       return {
         success: true,
         message: "Inicio de sesión exitoso",
-        redirectTo: "/dashboard", // Now handled by route groups
+        redirectTo: `/${data.user.tipoUsuario}/dashboard`, // Direct to role-specific dashboard
       }
     }
 
@@ -98,6 +98,6 @@ export async function logout() {
   const cookieStore = await cookies()
   cookieStore.delete("auth_token")
   cookieStore.delete("user_type")
-  redirect("/login")
+  redirect("/")
 }
 
