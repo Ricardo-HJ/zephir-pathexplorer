@@ -33,7 +33,7 @@ export function AppSidebar() {
   // Footer items with Spanish names
   const footerItems: { name: IconIdKeys; path: string}[] = [
     { name: "Ajustes", path: "/shared/settings" },
-    { name: "Cerrar sesion", path: "/api/auth/logout" },
+    { name: "Cerrar sesion", path: "#" },
   ]
 
   return (
@@ -95,6 +95,38 @@ export function AppSidebar() {
       {/* Footer navigation */}
       <div className="flex flex-col items-start px-3 gap-4 py-8 mt-auto">
         {footerItems.map((item) => {
+          // Special handling for logout
+          if (item.name === "Cerrar sesion") {
+            return (
+              <button
+                key={item.name}
+                onClick={async () => {
+                  try {
+                    // Call the logout API endpoint
+                    await fetch("/api/auth/logout", { method: "GET" })
+                    // Redirect to login page
+                    window.location.href = "/"
+                  } catch (error) {
+                    console.error("Logout failed:", error)
+                  }
+                }}
+                className={`
+                  flex items-center ${isExpanded ? "w-[90%] px-4" : "w-10 justify-center"} h-10 rounded-md
+                  hover:bg-white/60 transition-all duration-200 cursor-pointer
+                `}
+                title={item.name}
+              >
+                <div className="w-5 h-5 flex items-center justify-center text-gray-500">
+                  <svg className="w-4 h-4" aria-hidden="true">
+                    <use href={`/sprite.svg#${iconIds[item.name]}`} />
+                  </svg>
+                </div>
+                {isExpanded && <span className="ml-3 text-gray-500">{item.name}</span>}
+              </button>
+            )
+          }
+
+          // Regular link for other items
           return (
             <Link
               key={item.name}
