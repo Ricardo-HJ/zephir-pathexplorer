@@ -1,6 +1,7 @@
-// /app/dashboard/layout.tsx
+// src/app/dashboard/layout.tsx
 import type { ReactNode } from "react"
 import { requireAuth } from "@/app/auth/utils"
+import { AppSidebar } from "@/components/layout/sidebar"
 
 export default async function DashboardLayout({
   children,
@@ -11,9 +12,12 @@ export default async function DashboardLayout({
   await requireAuth() // Ensure user is authenticated
   
   return (
-    <div>
-      {/* Common dashboard layout elements go here */}
-      <main>{children}</main>
+    <div className="flex min-h-screen">
+      <AppSidebar />
+      <div className="flex-1 ml-16 transition-all duration-300">
+        {/* Common dashboard layout elements go here */}
+        <main className="p-6">{children}</main>
+      </div>
     </div>
   )
 }

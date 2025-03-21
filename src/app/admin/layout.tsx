@@ -1,5 +1,7 @@
+// src/app/admin/layout.tsx
 import type { ReactNode } from "react"
 import { requireRole } from "@/app/auth/utils"
+import { AppSidebar } from "@/components/layout/sidebar"
 
 export default async function AdminLayout({
   children,
@@ -10,9 +12,12 @@ export default async function AdminLayout({
   await requireRole("admin") // Ensure only admins can access
   
   return (
-    <div>
-      {/* Common admin layout elements go here */}
-      <main>{children}</main>
+    <div className="flex min-h-screen">
+      <AppSidebar />
+      <div className="flex-1 ml-16 transition-all duration-300">
+        {/* Common admin layout elements go here */}
+        <main className="p-6">{children}</main>
+      </div>
     </div>
   )
 }

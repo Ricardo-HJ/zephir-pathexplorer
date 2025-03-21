@@ -10,7 +10,7 @@ type IconIdKeys = "Inicio" | "Carrera" | "Habilidades" | "Proyectos" | "Analisis
 export function AppSidebar() {
   const pathname = usePathname()
   const [isExpanded, setIsExpanded] = useState(false)
-  const { isLead } = useAuth()
+  const { isLead, logout } = useAuth()
 
   // Navigation items with Spanish names
   const navItems: { name: IconIdKeys; path: string }[] = [
@@ -105,16 +105,7 @@ export function AppSidebar() {
             return (
               <button
                 key={item.name}
-                onClick={async () => {
-                  try {
-                    // Call the logout API endpoint
-                    await fetch("/api/auth/logout", { method: "GET" })
-                    // Redirect to login page
-                    window.location.href = "/"
-                  } catch (error) {
-                    console.error("Logout failed:", error)
-                  }
-                }}
+                onClick={logout} // Use the logout function from useAuth
                 className={`
                   flex items-center ${isExpanded ? "w-[90%] px-4" : "w-10 justify-center"} h-10 rounded-md
                   hover:bg-white/60 transition-all duration-200 cursor-pointer
