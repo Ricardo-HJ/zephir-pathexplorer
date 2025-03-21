@@ -1,15 +1,26 @@
-// /app/dashboard/[employeeId]/page.tsx
+// src/app/dashboard/[employeeId]/page.tsx
 import { notFound } from "next/navigation"
 import { requireAuth } from "@/app/auth/utils"
 
+interface EmployeeDashboardPageProps {
+  params: {
+    employeeId: string
+  }
+}
+
 export default async function EmployeeDashboardPage({
   params,
-}: {
-  params: { employeeId: string }
-}) {
+}: EmployeeDashboardPageProps) {
   // This is the employee-specific dashboard page
-  const { employeeId } = params
   const currentUser = await requireAuth()
+  
+  // Get employeeId after ensuring it exists
+  const employeeId = params?.employeeId
+  
+  // Handle case where employeeId is undefined
+  if (!employeeId) {
+    notFound()
+  }
   
   // Authorization check - only allow if user is a lead OR if the employee is viewing their own dashboard
   if (currentUser.tipoUsuario !== "lead" && currentUser.idUsuario !== employeeId) {

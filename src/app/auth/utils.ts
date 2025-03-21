@@ -30,6 +30,8 @@ export async function getCurrentUser(): Promise<User | null> {
       exp: number
     }>(token)
 
+    console.log("Decoded token:", JSON.stringify(decoded, null, 2))
+
     // Check if token is expired
     const currentTime = Math.floor(Date.now() / 1000)
     if (decoded.exp < currentTime) {

@@ -14,6 +14,13 @@ interface LoginResponse {
   }
 }
 
+export async function forceRelogin() {
+  const cookieStore = await cookies()
+  cookieStore.delete("auth_token")
+  cookieStore.delete("user_type")
+  redirect("/")
+}
+
 export async function login(prevState: any, formData: FormData) {
   const correo = formData.get("email") as string
   const contraseña = formData.get("password") as string
