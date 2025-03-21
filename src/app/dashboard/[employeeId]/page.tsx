@@ -2,20 +2,18 @@
 import { notFound } from "next/navigation"
 import { requireAuth } from "@/app/auth/utils"
 
-interface EmployeeDashboardPageProps {
-  params: {
-    employeeId: string
-  }
+interface Params {
+  employeeId?: string
 }
 
-export default async function EmployeeDashboardPage({
-  params,
-}: EmployeeDashboardPageProps) {
+interface Props {
+  params: Params
+}
+
+export default async function EmployeeDashboardPage({ params }: Props) {
   // This is the employee-specific dashboard page
+  const { employeeId } = await params
   const currentUser = await requireAuth()
-  
-  // Get employeeId after ensuring it exists
-  const employeeId = params?.employeeId
   
   // Handle case where employeeId is undefined
   if (!employeeId) {
