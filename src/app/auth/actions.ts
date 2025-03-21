@@ -74,12 +74,18 @@ export async function login(prevState: any, formData: FormData) {
         maxAge,
       })
 
+      // Determine redirect based on user type
+      let redirectTo = "/dashboard"
+      if (data.user.tipoUsuario === "admin") {
+        redirectTo = "/admin"
+      } else if (data.user.tipoUsuario === "lead") {
+        redirectTo = "/lead"
+      }
+
       return {
         success: true,
         message: "Inicio de sesión exitoso",
-        redirectTo: data.user.tipoUsuario === "lead" 
-        ? "/lead" 
-        : "/dashboard", // Employee goes to dashboard
+        redirectTo,
       }
     }
 
@@ -102,3 +108,4 @@ export async function logout() {
   cookieStore.delete("user_type")
   redirect("/")
 }
+

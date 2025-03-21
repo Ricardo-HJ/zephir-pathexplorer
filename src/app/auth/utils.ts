@@ -1,5 +1,6 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { jwtDecode } from "jwt-decode"
 
 // Define user types based on your backend
 export type User = {
@@ -13,36 +14,43 @@ export type User = {
  */
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies()
-  const token = cookieStore.get("AUTH_TOKEN")?.value
+  const token = cookieStore.get("auth_token")?.value
 
   if (!token) {
     return null
   }
 
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/profile`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    })
+    // Decode the JWT token directly instead of making an API call
+    const decoded = jwtDecode<{
+      idUsuario: string
+      correo: string
+      tipoUsuario: string
+      iat: number
+      exp: number
+    }>(token)
 
-    if (!response.ok) {
-      if (response.status === 401 || response.status === 403) {
-        // Token is invalid or expired - clear it
-        cookieStore.delete("AUTH_TOKEN")
-        return null
-      }
-
-      console.error("Error fetching user profile:", response.status, response.statusText)
-      return null // Return null instead of throwing to prevent uncaught exceptions
+    // Check if token is expired
+    const currentTime = Math.floor(Date.now() / 1000)
+    if (decoded.exp < currentTime) {
+      // Token is expired - clear it
+      cookieStore.delete("auth_token")
+      cookieStore.delete("user_type")
+      return null
     }
 
-    const data = await response.json()
-    return data.user
+    // Return user data from the token
+    return {
+      idUsuario: decoded.idUsuario,
+      correo: decoded.correo,
+      tipoUsuario: decoded.tipoUsuario,
+    }
   } catch (error) {
-    console.error("Error in getCurrentUser:", error)
-    return null // Return null instead of throwing to prevent uncaught exceptions
+    console.error("Error decoding token:", error)
+    // Invalid token - clear it
+    cookieStore.delete("auth_token")
+    cookieStore.delete("user_type")
+    return null
   }
 }
 
@@ -70,5 +78,12 @@ export async function requireRole(role: string) {
   }
 
   return user
+}
+
+/**
+ * Helper function for lead role
+ */
+export async function requireLead() {
+  return requireRole("lead")
 }
 
