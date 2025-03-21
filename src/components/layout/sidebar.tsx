@@ -1,18 +1,23 @@
 "use client"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
 import Image from "next/image"
+import { usePathname } from "next/navigation"
 import { useState } from "react"
+import { useAuth } from "@/app/auth/hooks/useAuth"
 
 type IconIdKeys = "Inicio" | "Carrera" | "Habilidades" | "Proyectos" | "Analisis" | "Ajustes" | "Cerrar sesion"
 
 export function AppSidebar() {
   const pathname = usePathname()
   const [isExpanded, setIsExpanded] = useState(false)
+  const { isLead } = useAuth()
 
   // Navigation items with Spanish names
   const navItems: { name: IconIdKeys; path: string }[] = [
-    { name: "Inicio", path: "/dashboard" },
+    { 
+      name: "Inicio", 
+      path: isLead ? "/lead" : "/dashboard" 
+    },
     { name: "Carrera", path: "/tools" },
     { name: "Habilidades", path: "/resources" },
     { name: "Proyectos", path: "/team" },

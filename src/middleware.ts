@@ -1,3 +1,4 @@
+// /src/middleware.ts
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
@@ -6,11 +7,11 @@ export function middleware(request: NextRequest) {
   const userType = request.cookies.get("user_type")?.value
   const path = request.nextUrl.pathname
 
-  // Define route patterns
+  // Define route patterns - UPDATED
   const adminRoutes = ["/admin"]
   const leadRoutes = ["/lead"]
   const employeeRoutes = ["/employee"]
-  const sharedRoutes = ["/shared"]
+  const dashboardRoutes = ["/dashboard"]
   const authRoutes = ["/auth"]
   const isRootPath = path === "/"
 
@@ -18,7 +19,7 @@ export function middleware(request: NextRequest) {
   const isAdminRoute = adminRoutes.some((route) => path.startsWith(route))
   const isLeadRoute = leadRoutes.some((route) => path.startsWith(route))
   const isEmployeeRoute = employeeRoutes.some((route) => path.startsWith(route))
-  const isSharedRoute = sharedRoutes.some((route) => path.startsWith(route))
+  const isDashboardRoute = dashboardRoutes.some((route) => path.startsWith(route))
   const isAuthRoute = authRoutes.some((route) => path.startsWith(route))
 
   // CASE 1: Unauthenticated users
@@ -29,7 +30,7 @@ export function middleware(request: NextRequest) {
     }
 
     // Redirect to root (login) for protected routes
-    if (isAdminRoute || isLeadRoute || isEmployeeRoute || isSharedRoute) {
+    if (isAdminRoute || isLeadRoute || isEmployeeRoute || isDashboardRoute) {
       return NextResponse.redirect(new URL("/", request.url))
     }
 
@@ -42,11 +43,14 @@ export function middleware(request: NextRequest) {
   if (isRootPath) {
     switch (userType) {
       case "admin":
-        return NextResponse.redirect(new URL("/admin/dashboard", request.url))
+        return NextResponse.redirect(new URL("/admin", request.url))
       case "lead":
-        return NextResponse.redirect(new URL("/lead/dashboard", request.url))
+        return NextResponse.redirect(new URL("/lead", request.url))
       case "employee":
-        return NextResponse.redirect(new URL("/employee/dashboard", request.url))
+        // Redirect employees directly to their dashboard
+        // We need to extract the user ID from the token or cookies
+        // For now, we'll redirect to the main dashboard which will handle the redirection
+        return NextResponse.redirect(new URL("/dashboard", request.url))
       default:
         // If user type is unknown, clear cookies and stay on login
         const response = NextResponse.next()
@@ -60,11 +64,11 @@ export function middleware(request: NextRequest) {
   if (isAuthRoute) {
     switch (userType) {
       case "admin":
-        return NextResponse.redirect(new URL("/admin/dashboard", request.url))
+        return NextResponse.redirect(new URL("/admin", request.url))
       case "lead":
-        return NextResponse.redirect(new URL("/lead/dashboard", request.url))
+        return NextResponse.redirect(new URL("/lead", request.url))
       case "employee":
-        return NextResponse.redirect(new URL("/employee/dashboard", request.url))
+        return NextResponse.redirect(new URL("/dashboard", request.url))
       default:
         // If user type is unknown, clear cookies and stay on login
         const response = NextResponse.redirect(new URL("/", request.url))
@@ -76,15 +80,15 @@ export function middleware(request: NextRequest) {
 
   // Role-based access control for protected routes
   if (isAdminRoute && userType !== "admin") {
-    return NextResponse.redirect(new URL(`/${userType}/dashboard`, request.url))
+    return NextResponse.redirect(new URL(userType === "lead" ? "/lead" : "/dashboard", request.url))
   }
 
   if (isLeadRoute && userType !== "lead") {
-    return NextResponse.redirect(new URL(`/${userType}/dashboard`, request.url))
+    return NextResponse.redirect(new URL(userType === "admin" ? "/admin" : "/dashboard", request.url))
   }
 
   if (isEmployeeRoute && userType !== "employee") {
-    return NextResponse.redirect(new URL(`/${userType}/dashboard`, request.url))
+    return NextResponse.redirect(new URL(userType === "admin" ? "/admin" : userType === "lead" ? "/lead" : "/dashboard", request.url))
   }
 
   // For all other cases, proceed normally
@@ -103,4 +107,3 @@ export const config = {
     "/((?!_next|static|favicon.ico|api).*)",
   ],
 }
-

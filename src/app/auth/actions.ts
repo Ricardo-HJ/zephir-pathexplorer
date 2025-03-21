@@ -77,7 +77,9 @@ export async function login(prevState: any, formData: FormData) {
       return {
         success: true,
         message: "Inicio de sesión exitoso",
-        redirectTo: `/${data.user.tipoUsuario}/dashboard`, // Direct to role-specific dashboard
+        redirectTo: data.user.tipoUsuario === "lead" 
+        ? "/lead" 
+        : "/dashboard", // Employee goes to dashboard
       }
     }
 
