@@ -100,4 +100,3 @@ export async function logout() {
   cookieStore.delete("user_type")
   redirect("/")
 }
-

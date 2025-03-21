@@ -26,7 +26,6 @@ export async function getCurrentUser(): Promise<User | null> {
     if (!response.ok) {
       if (response.status === 401) {
         // Token is invalid or expired
-        const cookieStore = await cookies()
         cookieStore.delete("auth_token")
         cookieStore.delete("user_type")
         return null
@@ -52,66 +51,30 @@ export async function requireAuth() {
   return user
 }
 
-export async function requireAdmin() {
+export async function requireRole(allowedRoles: string[]) {
   const user = await getCurrentUser()
 
   if (!user) {
     redirect("/")
   }
 
-  if (user.tipoUsuario !== "admin") {
+  if (!allowedRoles.includes(user.tipoUsuario)) {
     // Redirect to appropriate dashboard based on user type
-    if (user.tipoUsuario === "lead") {
-      redirect("/lead/dashboard")
-    } else if (user.tipoUsuario === "employee") {
-      redirect("/employee/dashboard")
-    } else {
-      redirect("/")
-    }
+    redirect(`/${user.tipoUsuario}/dashboard`)
   }
 
   return user
+}
+
+// Specific role requirements (for convenience)
+export async function requireAdmin() {
+  return requireRole(["admin"])
 }
 
 export async function requireLead() {
-  const user = await getCurrentUser()
-
-  if (!user) {
-    redirect("/")
-  }
-
-  if (user.tipoUsuario !== "lead") {
-    // Redirect to appropriate dashboard based on user type
-    if (user.tipoUsuario === "admin") {
-      redirect("/admin/dashboard")
-    } else if (user.tipoUsuario === "employee") {
-      redirect("/employee/dashboard")
-    } else {
-      redirect("/")
-    }
-  }
-
-  return user
+  return requireRole(["lead"])
 }
 
 export async function requireEmployee() {
-  const user = await getCurrentUser()
-
-  if (!user) {
-    redirect("/")
-  }
-
-  if (user.tipoUsuario !== "employee") {
-    // Redirect to appropriate dashboard based on user type
-    if (user.tipoUsuario === "admin") {
-      redirect("/admin/dashboard")
-    } else if (user.tipoUsuario === "lead") {
-      redirect("/lead/dashboard")
-    } else {
-      redirect("/")
-    }
-  }
-
-  return user
+  return requireRole(["employee"])
 }
-

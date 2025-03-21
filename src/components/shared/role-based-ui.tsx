@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useUserRole } from "@/hooks/useUserRole"
+import { useAuth } from "@/app/auth/hooks/useAuth"
 
 interface RoleBasedUIProps {
   roles: string[]
@@ -11,7 +11,7 @@ interface RoleBasedUIProps {
 }
 
 export function RoleBasedUI({ roles, children, fallback = null }: RoleBasedUIProps) {
-  const { role, isLoading } = useUserRole()
+  const { role, isLoading } = useAuth()
 
   // Don't render anything while loading
   if (isLoading) {
