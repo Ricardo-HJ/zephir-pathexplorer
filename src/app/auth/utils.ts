@@ -35,9 +35,7 @@ export async function getCurrentUser(): Promise<User | null> {
     // Check if token is expired
     const currentTime = Math.floor(Date.now() / 1000)
     if (decoded.exp < currentTime) {
-      // Token is expired - clear it
-      cookieStore.delete("auth_token")
-      cookieStore.delete("user_type")
+      // Don't modify cookies here - return null and handle in a Server Action
       return null
     }
 
@@ -49,9 +47,7 @@ export async function getCurrentUser(): Promise<User | null> {
     }
   } catch (error) {
     console.error("Error decoding token:", error)
-    // Invalid token - clear it
-    cookieStore.delete("auth_token")
-    cookieStore.delete("user_type")
+    // Don't modify cookies here - return null and handle in a Server Action
     return null
   }
 }

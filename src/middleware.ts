@@ -1,13 +1,14 @@
 // /src/middleware.ts
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
+import { jwtDecode } from "jwt-decode"
 
 export function middleware(request: NextRequest) {
   const authToken = request.cookies.get("auth_token")?.value
   const userType = request.cookies.get("user_type")?.value
   const path = request.nextUrl.pathname
 
-  // Define route patterns - UPDATED
+  // Define route patterns
   const adminRoutes = ["/admin"]
   const leadRoutes = ["/lead"]
   const employeeRoutes = ["/employee"]
@@ -21,6 +22,26 @@ export function middleware(request: NextRequest) {
   const isEmployeeRoute = employeeRoutes.some((route) => path.startsWith(route))
   const isDashboardRoute = dashboardRoutes.some((route) => path.startsWith(route))
   const isAuthRoute = authRoutes.some((route) => path.startsWith(route))
+
+  // Check if token is expired
+  let isTokenExpired = false
+  if (authToken) {
+    try {
+      const decoded = jwtDecode<{ exp: number }>(authToken)
+      const currentTime = Math.floor(Date.now() / 1000)
+      isTokenExpired = decoded.exp < currentTime
+    } catch (error) {
+      isTokenExpired = true
+    }
+  }
+
+  // If token is expired, clear cookies and redirect to login
+  if (authToken && isTokenExpired) {
+    const response = NextResponse.redirect(new URL("/?invalidToken=true", request.url))
+    response.cookies.delete("auth_token")
+    response.cookies.delete("user_type")
+    return response
+  }
 
   // CASE 1: Unauthenticated users
   if (!authToken) {
@@ -48,8 +69,6 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL("/lead", request.url))
       case "employee":
         // Redirect employees directly to their dashboard
-        // We need to extract the user ID from the token or cookies
-        // For now, we'll redirect to the main dashboard which will handle the redirection
         return NextResponse.redirect(new URL("/dashboard", request.url))
       default:
         // If user type is unknown, clear cookies and stay on login
@@ -88,7 +107,9 @@ export function middleware(request: NextRequest) {
   }
 
   if (isEmployeeRoute && userType !== "employee") {
-    return NextResponse.redirect(new URL(userType === "admin" ? "/admin" : userType === "lead" ? "/lead" : "/dashboard", request.url))
+    return NextResponse.redirect(
+      new URL(userType === "admin" ? "/admin" : userType === "lead" ? "/lead" : "/dashboard", request.url),
+    )
   }
 
   // For all other cases, proceed normally
@@ -107,3 +128,4 @@ export const config = {
     "/((?!_next|static|favicon.ico|api).*)",
   ],
 }
+
