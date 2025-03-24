@@ -21,7 +21,7 @@ export default async function EmployeeDashboardPage({ params }: Props) {
   }
   
   // Authorization check - only allow if user is a lead OR if the employee is viewing their own dashboard
-  if (currentUser.tipoUsuario !== "lead" && currentUser.idUsuario !== employeeId) {
+  if (currentUser.tipoUsuario === "employee" && currentUser.idUsuario !== employeeId) {
     // Not authorized to view this employee's data
     notFound()
   }
