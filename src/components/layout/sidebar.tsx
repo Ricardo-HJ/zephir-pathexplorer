@@ -14,9 +14,9 @@ export function AppSidebar() {
 
   // Navigation items with Spanish names
   const navItems: { name: IconIdKeys; path: string }[] = [
-    { 
-      name: "Inicio", 
-      path: isLead ? "/lead" : "/dashboard/" 
+    {
+      name: "Inicio",
+      path: isLead ? "/lead" : "/dashboard/",
     },
     { name: "Carrera", path: "/tools" },
     { name: "Habilidades", path: "/resources" },
@@ -36,7 +36,7 @@ export function AppSidebar() {
   }
 
   // Footer items with Spanish names
-  const footerItems: { name: IconIdKeys; path: string}[] = [
+  const footerItems: { name: IconIdKeys; path: string }[] = [
     { name: "Ajustes", path: "/shared/settings" },
     { name: "Cerrar sesion", path: "#" },
   ]
@@ -71,7 +71,8 @@ export function AppSidebar() {
       {/* Main navigation */}
       <nav className="flex-1 flex flex-col items-start px-3 gap-4 py-4">
         {navItems.map((item) => {
-          const isActive = pathname.includes(item.path)
+          const isActive =
+            item.name === "Inicio" && pathname.startsWith("/dashboard") ? true : pathname.includes(item.path)
 
           return (
             <Link
