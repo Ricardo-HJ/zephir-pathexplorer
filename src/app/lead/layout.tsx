@@ -16,7 +16,7 @@ export default async function LeadLayout({
       <AppSidebar />
       <div className="flex-1 ml-16 transition-all duration-300">
         {/* Common lead layout elements go here */}
-        <main className="p-6">{children}</main>
+        <main className="pl-8 pt-8 pb-8 pr-16">{children}</main>
       </div>
     </div>
   )

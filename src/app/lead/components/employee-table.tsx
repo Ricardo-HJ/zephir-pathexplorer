@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { useAuth } from "@/app/auth/hooks/useAuth"
 import * as React from "react"
 
 // Employee type definition
@@ -38,6 +39,7 @@ type FilterOptions = {
 
 // Client component for the employee table with pagination
 export function EmployeeTable({ employees }: EmployeeTableProps) {
+  const { userId } = useAuth()
   const [searchQuery, setSearchQuery] = useState("")
   const [currentPage, setCurrentPage] = useState(1)
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -323,11 +325,15 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
           </Popover>
         </div>
 
-        {/* Profile button */}
-        <Button variant="default" className="ml-auto">
-          <User className="mr-2 h-4 w-4" />
-          Ver mi perfil
-        </Button>
+        {/* Profile button - links directly to the current user's profile using userId from auth hook */}
+        {userId && (
+          <Link href={`/dashboard/${userId}`}>
+            <Button variant="default" className="ml-auto">
+              <User className="mr-2 h-4 w-4" />
+              Ver mi perfil
+            </Button>
+          </Link>
+        )}
       </div>
 
       {/* Employee table */}
@@ -352,7 +358,7 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
               <div className="col-span-1 flex items-center space-x-3">
                 <div className="h-10 w-10 rounded-full overflow-hidden">
                   <Image
-                    src={employee.avatar || "/placeholder.svg"}
+                    src={employee.avatar || "/placeholder.svg?height=40&width=40"}
                     alt={employee.name}
                     width={40}
                     height={40}

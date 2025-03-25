@@ -16,7 +16,7 @@ export function AppSidebar() {
   const navItems: { name: IconIdKeys; path: string }[] = [
     { 
       name: "Inicio", 
-      path: isLead ? "/lead" : "/dashboard" 
+      path: isLead ? "/lead" : "/dashboard/" 
     },
     { name: "Carrera", path: "/tools" },
     { name: "Habilidades", path: "/resources" },
