@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import * as React from "react"
 
 // Employee type definition
 interface Employee {
@@ -49,6 +50,21 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
   const [showFilters, setShowFilters] = useState(false)
   const itemsPerPage = 8
 
+  const [tempFilterOptions, setTempFilterOptions] = useState<FilterOptions>({
+    minLevel: null,
+    maxLevel: null,
+    positions: [],
+    minAvailability: null,
+    minExperience: null,
+  })
+
+  // Initialize temp filters when popover opens
+  React.useEffect(() => {
+    if (showFilters) {
+      setTempFilterOptions({ ...filterOptions })
+    }
+  }, [showFilters, filterOptions])
+
   // Get unique positions for filter
   const uniquePositions = Array.from(new Set(employees.map((emp) => emp.position)))
 
@@ -69,15 +85,18 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
     })
   }
 
-  // Reset filters
+  // Reset all filters (both temp and applied)
   const resetFilters = () => {
-    setFilterOptions({
+    const emptyFilters = {
       minLevel: null,
       maxLevel: null,
       positions: [],
       minAvailability: null,
       minExperience: null,
-    })
+    }
+    setFilterOptions(emptyFilters)
+    setTempFilterOptions(emptyFilters)
+    setShowFilters(false)
   }
 
   // Filter employees based on search query and filter options
@@ -154,10 +173,10 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
                     <div>
                       <Label htmlFor="min-level">Mínimo</Label>
                       <Select
-                        value={filterOptions.minLevel?.toString() || ""}
+                        value={tempFilterOptions.minLevel?.toString() || ""}
                         onValueChange={(value) =>
-                          setFilterOptions({
-                            ...filterOptions,
+                          setTempFilterOptions({
+                            ...tempFilterOptions,
                             minLevel: value ? Number.parseInt(value) : null,
                           })
                         }
@@ -178,10 +197,10 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
                     <div>
                       <Label htmlFor="max-level">Máximo</Label>
                       <Select
-                        value={filterOptions.maxLevel?.toString() || ""}
+                        value={tempFilterOptions.maxLevel?.toString() || ""}
                         onValueChange={(value) =>
-                          setFilterOptions({
-                            ...filterOptions,
+                          setTempFilterOptions({
+                            ...tempFilterOptions,
                             maxLevel: value ? Number.parseInt(value) : null,
                           })
                         }
@@ -210,8 +229,22 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
                       <div key={position} className="flex items-center space-x-2">
                         <Checkbox
                           id={`position-${position}`}
-                          checked={filterOptions.positions.includes(position)}
-                          onCheckedChange={() => togglePositionFilter(position)}
+                          checked={tempFilterOptions.positions.includes(position)}
+                          onCheckedChange={() => {
+                            setTempFilterOptions((prev) => {
+                              if (prev.positions.includes(position)) {
+                                return {
+                                  ...prev,
+                                  positions: prev.positions.filter((p) => p !== position),
+                                }
+                              } else {
+                                return {
+                                  ...prev,
+                                  positions: [...prev.positions, position],
+                                }
+                              }
+                            })
+                          }}
                         />
                         <Label htmlFor={`position-${position}`}>{position}</Label>
                       </div>
@@ -223,10 +256,10 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium">Cargabilidad mínima</h4>
                   <Select
-                    value={filterOptions.minAvailability?.toString() || ""}
+                    value={tempFilterOptions.minAvailability?.toString() || ""}
                     onValueChange={(value) =>
-                      setFilterOptions({
-                        ...filterOptions,
+                      setTempFilterOptions({
+                        ...tempFilterOptions,
                         minAvailability: value ? Number.parseInt(value) : null,
                       })
                     }
@@ -249,10 +282,10 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
                 <div className="space-y-2">
                   <h4 className="text-sm font-medium">Experiencia mínima</h4>
                   <Select
-                    value={filterOptions.minExperience?.toString() || ""}
+                    value={tempFilterOptions.minExperience?.toString() || ""}
                     onValueChange={(value) =>
-                      setFilterOptions({
-                        ...filterOptions,
+                      setTempFilterOptions({
+                        ...tempFilterOptions,
                         minExperience: value ? Number.parseInt(value) : null,
                       })
                     }
@@ -276,7 +309,14 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
                   <Button variant="outline" onClick={resetFilters}>
                     Limpiar
                   </Button>
-                  <Button onClick={() => setShowFilters(false)}>Aplicar</Button>
+                  <Button
+                    onClick={() => {
+                      setFilterOptions(tempFilterOptions)
+                      setShowFilters(false)
+                    }}
+                  >
+                    Aplicar
+                  </Button>
                 </div>
               </div>
             </PopoverContent>
