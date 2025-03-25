@@ -327,7 +327,7 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
 
         {/* Profile button - links directly to the current user's profile using userId from auth hook */}
         {userId && (
-          <Link href={`/dashboard/${userId}`}>
+          <Link href={`/${userId}/dashboard`}>
             <Button variant="default" className="ml-auto">
               <User className="mr-2 h-4 w-4" />
               Ver mi perfil
@@ -351,7 +351,7 @@ export function EmployeeTable({ employees }: EmployeeTableProps) {
         <div className="divide-y">
           {currentEmployees.map((employee) => (
             <Link
-              href={`/dashboard/${employee.id}`}
+              href={`/${employee.id}/dashboard`}
               key={employee.id}
               className="grid grid-cols-5 items-center py-4 px-6 hover:bg-gray-50 transition-colors"
             >

@@ -108,7 +108,7 @@ const getMockEmployee = (id: string) => {
   }
 }
 
-export default function EmployeeProfilePage({ params }: Props) {
+export default function EmployeeProfilePage() {
   // State for expandable sections
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({})
 

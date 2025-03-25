@@ -10,18 +10,34 @@ type IconIdKeys = "Inicio" | "Carrera" | "Habilidades" | "Proyectos" | "Analisis
 export function AppSidebar() {
   const pathname = usePathname()
   const [isExpanded, setIsExpanded] = useState(false)
-  const { isLead, logout } = useAuth()
+  const { isLead, isEmployee, userId, logout } = useAuth()
 
-  // Navigation items with Spanish names
+  // Navigation items with Spanish names - adjusted based on user role
   const navItems: { name: IconIdKeys; path: string }[] = [
     {
       name: "Inicio",
-      path: isLead ? "/lead" : "/dashboard/",
+      path: isLead 
+        ? "/lead" 
+        : isEmployee 
+          ? `/${userId}/dashboard` 
+          : "/admin",
     },
-    { name: "Carrera", path: "/tools" },
-    { name: "Habilidades", path: "/resources" },
-    { name: "Proyectos", path: "/team" },
-    { name: "Analisis", path: "/reports" },
+    { 
+      name: "Carrera", 
+      path: "/carrer" 
+    },
+    { 
+      name: "Habilidades", 
+      path: `/${userId}/learning` 
+    },
+    { 
+      name: "Proyectos", 
+      path: "/team" 
+    },
+    { 
+      name: "Analisis", 
+      path: "/reports" 
+    },
   ]
 
   // Icon mapping (Spanish name to icon ID)
@@ -71,8 +87,11 @@ export function AppSidebar() {
       {/* Main navigation */}
       <nav className="flex-1 flex flex-col items-start px-3 gap-4 py-4">
         {navItems.map((item) => {
-          const isActive =
-            item.name === "Inicio" && pathname.startsWith("/dashboard") ? true : pathname.includes(item.path)
+          // Check if the current path matches this nav item
+          const isActive = pathname.includes(item.path.split('/').pop() || '') || 
+                          (item.name === "Inicio" && pathname.includes("dashboard")) ||
+                          (item.name === "Inicio" && pathname === "/lead") ||
+                          (item.name === "Inicio" && pathname === "/admin")
 
           return (
             <Link
@@ -147,4 +166,3 @@ export function AppSidebar() {
     </aside>
   )
 }
-
