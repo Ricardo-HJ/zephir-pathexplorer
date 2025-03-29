@@ -6,6 +6,7 @@ import { jwtDecode } from "jwt-decode"
 export function middleware(request: NextRequest) {
   const authToken = request.cookies.get("auth_token")?.value
   const userType = request.cookies.get("user_type")?.value
+  const userId = request.cookies.get("user_id")?.value
   const path = request.nextUrl.pathname
 
   // Define route patterns
@@ -40,6 +41,7 @@ export function middleware(request: NextRequest) {
     const response = NextResponse.redirect(new URL("/?invalidToken=true", request.url))
     response.cookies.delete("auth_token")
     response.cookies.delete("user_type")
+    response.cookies.delete("user_id") // Added user_id cookie deletion
     return response
   }
 
@@ -68,13 +70,18 @@ export function middleware(request: NextRequest) {
       case "lead":
         return NextResponse.redirect(new URL("/lead", request.url))
       case "employee":
-        // Redirect employees directly to their dashboard
+        // Redirect employees directly to their dashboard using their user ID
+        if (userId) {
+          return NextResponse.redirect(new URL(`/${userId}/dashboard`, request.url))
+        }
+        // Fall back to generic dashboard if userId is missing
         return NextResponse.redirect(new URL("/dashboard", request.url))
       default:
         // If user type is unknown, clear cookies and stay on login
         const response = NextResponse.next()
         response.cookies.delete("auth_token")
         response.cookies.delete("user_type")
+        response.cookies.delete("user_id") // Added user_id cookie deletion
         return response
     }
   }
@@ -87,28 +94,34 @@ export function middleware(request: NextRequest) {
       case "lead":
         return NextResponse.redirect(new URL("/lead", request.url))
       case "employee":
+        // Redirect employees directly to their dashboard using their user ID
+        if (userId) {
+          return NextResponse.redirect(new URL(`/${userId}/dashboard`, request.url))
+        }
+        // Fall back to generic dashboard if userId is missing
         return NextResponse.redirect(new URL("/dashboard", request.url))
       default:
         // If user type is unknown, clear cookies and stay on login
         const response = NextResponse.redirect(new URL("/", request.url))
         response.cookies.delete("auth_token")
         response.cookies.delete("user_type")
+        response.cookies.delete("user_id") // Added user_id cookie deletion
         return response
     }
   }
 
   // Role-based access control for protected routes
   if (isAdminRoute && userType !== "admin") {
-    return NextResponse.redirect(new URL(userType === "lead" ? "/lead" : "/dashboard", request.url))
+    return NextResponse.redirect(new URL(userType === "lead" ? "/lead" : `/${userId}/dashboard`, request.url))
   }
 
   if (isLeadRoute && userType !== "lead") {
-    return NextResponse.redirect(new URL(userType === "admin" ? "/admin" : "/dashboard", request.url))
+    return NextResponse.redirect(new URL(userType === "admin" ? "/admin" : `/${userId}/dashboard`, request.url))
   }
 
   if (isEmployeeRoute && userType !== "employee") {
     return NextResponse.redirect(
-      new URL(userType === "admin" ? "/admin" : userType === "lead" ? "/lead" : "/dashboard", request.url),
+      new URL(userType === "admin" ? "/admin" : userType === "lead" ? "/lead" : `/${userId}/dashboard`, request.url),
     )
   }
 

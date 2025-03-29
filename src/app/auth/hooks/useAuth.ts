@@ -12,9 +12,10 @@ export function useAuth() {
 
   useEffect(() => {
     const userType = Cookies.get("user_type")
-    // In a real app, you would get the user ID from the JWT token or a separate cookie
-    // For now, we'll use the current user's ID from the auth context
-    setUserId("1") // Mock ID for demonstration
+    // Get the user ID from the cookie instead of using a mock ID
+    const userIdFromCookie = Cookies.get("user_id")
+
+    setUserId(userIdFromCookie || null)
     setRole(userType || null)
     setIsLoading(false)
   }, [])
@@ -29,6 +30,7 @@ export function useAuth() {
       // Clear cookies on the client side as a fallback
       Cookies.remove("auth_token")
       Cookies.remove("user_type")
+      Cookies.remove("user_id") // Added user_id cookie deletion
 
       // Navigate to login page
       router.push("/")

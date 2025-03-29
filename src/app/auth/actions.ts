@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
+import { loginUser } from "@/services/api"
 
 interface LoginResponse {
   success: boolean
@@ -18,6 +19,7 @@ export async function forceRelogin() {
   const cookieStore = await cookies()
   cookieStore.delete("auth_token")
   cookieStore.delete("user_type")
+  cookieStore.delete("user_id") // Added user_id cookie deletion
   redirect("/")
 }
 
@@ -25,6 +27,7 @@ export async function clearAuthCookies() {
   const cookieStore = await cookies()
   cookieStore.delete("auth_token")
   cookieStore.delete("user_type")
+  cookieStore.delete("user_id") // Added user_id cookie deletion
 }
 
 export async function login(prevState: any, formData: FormData) {
@@ -41,28 +44,8 @@ export async function login(prevState: any, formData: FormData) {
   }
 
   try {
-    // Call the backend API
-    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        correo: correo,
-        contraseña: contraseña,
-      }),
-    })
-
-    console.log("Login response:", response.status)
-
-    const data: LoginResponse = await response.json()
-
-    if (!response.ok) {
-      return {
-        success: false,
-        message: data.message || "Error al iniciar sesión",
-      }
-    }
+    // Use the API service instead of direct fetch
+    const data = await loginUser(correo, contraseña)
 
     if (data.token && data.user) {
       // Set the token in cookies
@@ -87,8 +70,16 @@ export async function login(prevState: any, formData: FormData) {
         maxAge,
       })
 
+      // Store user ID in a separate cookie for client-side access
+      cookieStore.set("user_id", data.user.idUsuario, {
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge,
+      })
+
       // Determine redirect based on user type
-      let redirectTo = "/dashboard"
+      let redirectTo = `/${data.user.idUsuario}/dashboard`
       if (data.user.tipoUsuario === "admin") {
         redirectTo = "/admin"
       } else if (data.user.tipoUsuario === "lead") {
@@ -119,6 +110,7 @@ export async function logout() {
   const cookieStore = await cookies()
   cookieStore.delete("auth_token")
   cookieStore.delete("user_type")
+  cookieStore.delete("user_id") // Added user_id cookie deletion
   redirect("/")
 }
 

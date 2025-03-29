@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     authenticated: true,
     userType: userType?.value,
+    userId: user.idUsuario, // Added userId to the response
   })
 }
 
@@ -27,6 +28,7 @@ export async function DELETE(request: NextRequest) {
   const cookieStore = await cookies()
   cookieStore.delete("auth_token")
   cookieStore.delete("user_type")
+  cookieStore.delete("user_id") // Added user_id cookie deletion
 
   // Return success response
   return NextResponse.json({ success: true })

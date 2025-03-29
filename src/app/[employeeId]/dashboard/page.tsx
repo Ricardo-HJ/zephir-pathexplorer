@@ -2,126 +2,95 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronDown, ChevronRight, ExternalLink } from "lucide-react"
 import { RoleBasedUI } from "@/components/shared/role-based-ui"
 import { Button } from "@/components/ui/button"
 import { useAuth } from "@/app/auth/hooks/useAuth"
 import { useParams } from "next/navigation"
+import { useUserProfile } from "@/app/auth/hooks/use-user-profile"
+import { getUserSkills, getUserCertifications, getUserProjects } from "@/services/api"
+import Cookies from "js-cookie"
 
-// Type for the params
-interface Params {
-  employeeId: string
-}
-
-interface Props {
-  params: Params
-}
-
-// Mock employee data - in a real app, this would come from an API call
-const getMockEmployee = (id: string) => {
-  return {
-    id,
-    name: "Jacob Jones",
-    position: "Mobile developer",
-    level: 9,
-    years: 4,
-    availability: 82,
-    email: "jones.jacob@accenture.com",
-    phone: "+1 (219) 555-0114",
-    availableSince: "Junio '24",
-    experience: [
-      {
-        role: "React front end developer",
-        description:
-          "Vorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.",
-        feedback:
-          "Vorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.",
-        leader: "Floyd Miles",
-        startDate: "Febrero 25",
-        endDate: "Junio 25",
-        status: "En curso",
-      },
-      {
-        role: "Next front end developer",
-        company: "ITESM",
-        description:
-          "Vorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.",
-        feedback:
-          "Vorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.",
-        startDate: "Febrero 25",
-        endDate: "Junio 25",
-        status: "Terminado",
-      },
-      {
-        role: "Next front end developer",
-        company: "ITESM",
-        description:
-          "Vorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.",
-        feedback:
-          "Vorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc vulputate libero et velit interdum, ac aliquet odio mattis.",
-        startDate: "Febrero 25",
-        endDate: "Junio 25",
-        status: "Terminado",
-      },
-    ],
-    certifications: [
-      {
-        name: "Inglés C1",
-        provider: "Accenture",
-        expiryDate: "Junio 25",
-        status: "Aprobado",
-      },
-      {
-        name: "Francés C1",
-        provider: "Caduca",
-        expiryDate: "Junio 25",
-        status: "Pendiente",
-      },
-      {
-        name: "React",
-        provider: "Cursera",
-        expiryDate: "Junio 25",
-        status: "Pendiente",
-      },
-      {
-        name: "Javascript",
-        provider: "Cursera",
-        expiryDate: "Junio 25",
-        status: "Pendiente",
-      },
-      {
-        name: "HTML",
-        provider: "Cursera",
-        expiryDate: "Junio 25",
-        status: "Pendiente",
-      },
-      {
-        name: "CSS",
-        provider: "Cursera",
-        expiryDate: "Junio 25",
-        status: "Pendiente",
-      },
-    ],
-    softSkills: ["Liderazgo", "Comunicación", "Manejo de tiempo", "Empatía"],
-    hardSkills: ["Python", "IA", "HTML", "C++"],
-  }
-}
+/**
+ * CHANGES:
+ * 1. Fixed React import - using useEffect from react
+ * 2. Added import for getUserProjects API function
+ */
 
 export default function EmployeeProfilePage() {
   // State for expandable sections
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({})
+  const [skills, setSkills] = useState<{ soft: string[]; hard: string[] }>({ soft: [], hard: [] })
+  const [certifications, setCertifications] = useState<any[]>([])
+  const [experience, setExperience] = useState<any[]>([])
+  const [isLoadingSkills, setIsLoadingSkills] = useState(true)
+  const [isLoadingCerts, setIsLoadingCerts] = useState(true)
+  const [isLoadingExp, setIsLoadingExp] = useState(true)
 
   // Get current user info
   const { userId, role } = useAuth()
 
   // Get the employeeId from params
-  // In Next.js 15, we need to handle params differently in client components
-  // We'll use a type assertion to avoid the warning
   const { employeeId } = useParams() as { employeeId: string }
+
+  // Fetch the employee profile data
+  const { user, isLoading, error } = useUserProfile(employeeId)
 
   // Check if viewing own profile
   const isOwnProfile = userId === employeeId
+
+  // Fetch additional data when user is loaded
+  useEffect(() => {
+    async function fetchAdditionalData() {
+      if (!user || !employeeId) return
+
+      const token = Cookies.get("auth_token")
+      if (!token) return
+
+      try {
+        // Fetch skills
+        setIsLoadingSkills(true)
+        const skillsData = await getUserSkills(employeeId, token)
+        setSkills({
+          soft: skillsData.softSkills || [],
+          hard: skillsData.hardSkills || [],
+        })
+      } catch (err) {
+        console.error("Error fetching skills:", err)
+        // Initialize with empty arrays if API fails
+        setSkills({ soft: [], hard: [] })
+      } finally {
+        setIsLoadingSkills(false)
+      }
+
+      try {
+        // Fetch certifications
+        setIsLoadingCerts(true)
+        const certsData = await getUserCertifications(employeeId, token)
+        setCertifications(certsData.certifications || [])
+      } catch (err) {
+        console.error("Error fetching certifications:", err)
+        setCertifications([])
+      } finally {
+        setIsLoadingCerts(false)
+      }
+
+      try {
+        // Fetch experience (projects)
+        setIsLoadingExp(true)
+        const expData = await getUserProjects(employeeId, token)
+        setExperience(expData.projects || [])
+      } catch (err) {
+        console.error("Error fetching experience:", err)
+        setExperience([])
+      } finally {
+        setIsLoadingExp(false)
+      }
+    }
+
+    fetchAdditionalData()
+  }, [user, employeeId])
 
   // Toggle expansion for description or feedback
   const toggleExpand = (type: string, index: number) => {
@@ -138,8 +107,29 @@ export default function EmployeeProfilePage() {
     return !!expandedItems[key]
   }
 
-  // In a real app, you would fetch employee data from an API
-  const employee = getMockEmployee(employeeId)
+  // Show loading state for the entire page
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[calc(100vh-220px)]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-accenture-purple"></div>
+      </div>
+    )
+  }
+
+  // Show error state
+  if (error || !user) {
+    return (
+      <div className="flex justify-center items-center h-[calc(100vh-220px)]">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-red-600 mb-2">Error</h2>
+          <p>{error || "Failed to load employee profile"}</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Format the full name
+  const fullName = [user.nombre, user.apellidoP, user.apellidoM].filter(Boolean).join(" ") || user.correo
 
   return (
     <div>
@@ -150,51 +140,47 @@ export default function EmployeeProfilePage() {
           <div className="relative h-16 w-16 rounded-full overflow-hidden">
             <Image
               src="/placeholder.svg?height=64&width=64"
-              alt={employee.name}
+              alt={fullName}
               width={64}
               height={64}
               className="object-cover"
             />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">{employee.name}</h1>
+            <h1 className="text-2xl font-bold">{fullName}</h1>
             <p className="text-gray-600">
-              {employee.position}, Nivel {employee.level} -{" "}
-              <span className="text-accenture-purple">{employee.years} años</span>
+              {user.profesion || "No position specified"}
+              {user.fechaIngreso && ` - ${new Date(user.fechaIngreso).getFullYear() - new Date().getFullYear()} años`}
             </p>
           </div>
         </div>
 
-        {/* First divider */}
-        <div className="mx-10 h-16 w-px bg-gray-200"></div>
-
-        {/* Availability */}
-        <div>
-          <p className="text-lg font-semibold mb-1">Cargabilidad</p>
-          <div className="flex items-center gap-4">
-            <div className="w-48 h-4 bg-purple-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-accenture-purple rounded-full"
-                style={{ width: `${employee.availability}%` }}
-              ></div>
-            </div>
-            <span className="font-medium">{employee.availability}%</span>
-          </div>
-          <p className="text-xs text-gray-500 mt-1">Desde {employee.availableSince}</p>
-        </div>
-
-        {/* Second divider */}
-        <div className="mx-10 h-16 w-px bg-gray-200"></div>
+        {/* Divider */}
+        <div className="h-12 w-px bg-gray-300 mx-6"></div>
 
         {/* Contact info */}
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <p className="font-medium">{employee.email}</p>
-            <button className="text-gray-500">
-              <ExternalLink className="h-4 w-4" />
-            </button>
-          </div>
-          <p className="text-gray-600">{employee.phone}</p>
+          <p className="text-gray-600">
+            <span className="font-medium">Email:</span> {user.correo}
+          </p>
+          <p className="text-gray-600">
+            <span className="font-medium">Teléfono:</span> {user.telefono || "No especificado"}
+          </p>
+        </div>
+
+        {/* Divider */}
+        <div className="h-12 w-px bg-gray-300 mx-6"></div>
+
+        {/* Availability info */}
+        <div>
+          <p className="text-gray-600">
+            <span className="font-medium">Cargabilidad:</span> {/* This would come from API */}
+            <span className="text-green-600 font-medium"> 82%</span>
+          </p>
+          <p className="text-gray-600">
+            <span className="font-medium">Disponible desde:</span> {/* This would come from API */}
+            <span className="text-accenture-purple font-medium"> Junio '24</span>
+          </p>
         </div>
       </div>
 
@@ -214,85 +200,68 @@ export default function EmployeeProfilePage() {
             </Button>
           </div>
 
-          <div className="space-y-6 overflow-y-auto flex-grow">
-            {employee.experience.map((exp, index) => (
-              <div key={index} className="border-b pb-4 last:border-0">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-medium">{exp.role}</h3>
-                  {exp.company && <p className="text-gray-600">{exp.company}</p>}
-                </div>
-
-                {/* Description - expandable */}
-                <div className="mt-2">
-                  <div
-                    className="flex items-center gap-1 cursor-pointer"
-                    onClick={() => toggleExpand("description", index)}
-                  >
-                    {isExpanded("description", index) ? (
-                      <ChevronDown className="h-4 w-4" />
-                    ) : (
-                      <ChevronRight className="h-4 w-4" />
-                    )}
-                    <p className="text-sm text-gray-600">Descripción</p>
+          {isLoadingExp ? (
+            <div className="flex justify-center items-center h-full">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accenture-purple"></div>
+            </div>
+          ) : experience.length === 0 ? (
+            <div className="flex justify-center items-center h-full text-gray-500">No hay experiencia registrada</div>
+          ) : (
+            <div className="space-y-4 overflow-y-auto pr-2">
+              {experience.map((exp, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold">{exp.role || "Rol no especificado"}</h3>
+                    <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">
+                      {exp.status || "Completado"}
+                    </span>
                   </div>
-
-                  {isExpanded("description", index) && <p className="text-sm mt-1 pl-5">{exp.description}</p>}
-                </div>
-
-                {/* Feedback - expandable, only visible if not own profile */}
-                {!isOwnProfile && (
+                  <div className="mt-2 text-sm text-gray-600">
+                    <p>
+                      <span className="font-medium">Líder:</span> {exp.leader || "No especificado"}
+                    </p>
+                    <p>
+                      <span className="font-medium">Periodo:</span> {exp.startDate || "N/A"} - {exp.endDate || "N/A"}
+                    </p>
+                  </div>
                   <div className="mt-2">
-                    <div
-                      className="flex items-center gap-1 cursor-pointer"
+                    <button
+                      onClick={() => toggleExpand("description", index)}
+                      className="flex items-center text-sm text-accenture-purple"
+                    >
+                      {isExpanded("description", index) ? (
+                        <ChevronDown className="h-4 w-4 mr-1" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4 mr-1" />
+                      )}
+                      Descripción
+                    </button>
+                    {isExpanded("description", index) && (
+                      <p className="mt-2 text-sm text-gray-600">
+                        {exp.description || "No hay descripción disponible."}
+                      </p>
+                    )}
+                  </div>
+                  <div className="mt-2">
+                    <button
                       onClick={() => toggleExpand("feedback", index)}
+                      className="flex items-center text-sm text-accenture-purple"
                     >
                       {isExpanded("feedback", index) ? (
-                        <ChevronDown className="h-4 w-4" />
+                        <ChevronDown className="h-4 w-4 mr-1" />
                       ) : (
-                        <ChevronRight className="h-4 w-4" />
+                        <ChevronRight className="h-4 w-4 mr-1" />
                       )}
-                      <p className="text-sm text-gray-600">Feedback</p>
-                    </div>
-
-                    {isExpanded("feedback", index) && <p className="text-sm mt-1 pl-5">{exp.feedback}</p>}
+                      Feedback
+                    </button>
+                    {isExpanded("feedback", index) && (
+                      <p className="mt-2 text-sm text-gray-600">{exp.feedback || "No hay feedback disponible."}</p>
+                    )}
                   </div>
-                )}
-
-                {/* Always visible information */}
-                <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
-                  {exp.leader && (
-                    <div>
-                      <p className="text-gray-600">Líder</p>
-                      <p>{exp.leader}</p>
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-gray-600">Inicio</p>
-                    <p>{exp.startDate}</p>
-                  </div>
-                  <div>
-                    <p className="text-gray-600">Fin</p>
-                    <p>{exp.endDate}</p>
-                  </div>
-                  {exp.status && (
-                    <div>
-                      <span
-                        className={`inline-block px-2 py-1 text-xs rounded-full ${
-                          exp.status === "En curso"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : exp.status === "Terminado"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-gray-100 text-gray-800"
-                        }`}
-                      >
-                        {exp.status}
-                      </span>
-                    </div>
-                  )}
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Certifications section - middle column, about 25% width */}
@@ -309,29 +278,44 @@ export default function EmployeeProfilePage() {
             </Button>
           </div>
 
-          <div className="space-y-4 overflow-y-auto flex-grow">
-            {employee.certifications.map((cert, index) => (
-              <div key={index} className="border-b pb-4 last:border-0">
-                <div className="flex justify-between mb-2">
-                  <h3 className="font-medium">{cert.name}</h3>
-                  <p className="text-gray-600">{cert.provider}</p>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-2">
-                    <p className="text-sm text-gray-600">Caduca</p>
-                    <p className="text-sm">- {cert.expiryDate}</p>
+          {isLoadingCerts ? (
+            <div className="flex justify-center items-center h-full">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accenture-purple"></div>
+            </div>
+          ) : certifications.length === 0 ? (
+            <div className="flex justify-center items-center h-full text-gray-500">
+              No hay certificaciones registradas
+            </div>
+          ) : (
+            <div className="space-y-4 overflow-y-auto pr-2">
+              {certifications.map((cert, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold">{cert.name || "Certificación sin nombre"}</h3>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        cert.status === "Aprobado"
+                          ? "bg-green-100 text-green-800"
+                          : cert.status === "En proceso"
+                            ? "bg-yellow-100 text-yellow-800"
+                            : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {cert.status || "No especificado"}
+                    </span>
                   </div>
-                  <span
-                    className={`inline-block px-2 py-1 text-xs rounded-full ${
-                      cert.status === "Aprobado" ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"
-                    }`}
-                  >
-                    {cert.status}
-                  </span>
+                  <div className="mt-2 text-sm text-gray-600">
+                    <p>
+                      <span className="font-medium">Proveedor:</span> {cert.provider || "No especificado"}
+                    </p>
+                    <p>
+                      <span className="font-medium">Vence:</span> {cert.expiryDate || "No especificado"}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Skills sections - right column, about 45% width */}
@@ -349,14 +333,24 @@ export default function EmployeeProfilePage() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {employee.softSkills.map((skill, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-                  <p>{skill}</p>
-                </div>
-              ))}
-            </div>
+            {isLoadingSkills ? (
+              <div className="flex justify-center items-center h-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accenture-purple"></div>
+              </div>
+            ) : skills.soft.length === 0 ? (
+              <div className="flex justify-center items-center h-full text-gray-500">
+                No hay soft skills registradas
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {skills.soft.map((skill, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                    <p>{skill}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex flex-col h-1/2 pt-3">
@@ -372,14 +366,24 @@ export default function EmployeeProfilePage() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              {employee.hardSkills.map((skill, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <div className="w-2 h-2 rounded-full bg-gray-400"></div>
-                  <p>{skill}</p>
-                </div>
-              ))}
-            </div>
+            {isLoadingSkills ? (
+              <div className="flex justify-center items-center h-full">
+                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-accenture-purple"></div>
+              </div>
+            ) : skills.hard.length === 0 ? (
+              <div className="flex justify-center items-center h-full text-gray-500">
+                No hay hard skills registradas
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 gap-4">
+                {skills.hard.map((skill, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-gray-400"></div>
+                    <p>{skill}</p>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
