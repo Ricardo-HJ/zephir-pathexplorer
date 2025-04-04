@@ -1,5 +1,5 @@
 /**
- * NEW FILE: src/services/api.ts
+ * src/services/api.ts
  *
  * Purpose: Centralizes all API calls to the backend in one place.
  * This improves maintainability by:
@@ -13,34 +13,45 @@
  * - Handles common error patterns and authentication
  */
 
-import type { UserInput } from "@/types/user"
+import type { UserInput, Skill, Certificado, Curso } from "@/types/user"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL
 
 // User authentication
 export async function loginUser(email: string, password: string) {
-  const response = await fetch(`${API_URL}/api/users/login`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      correo: email,
-      contraseña: password,
-    }),
-  })
+  try {
+    console.log(`Attempting login for email: ${email} to URL: ${API_URL}/api/users/login`)
 
-  if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.message || "Error logging in")
+    const response = await fetch(`${API_URL}/api/users/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        correo: email,
+        contraseña: password, // Send the password as plain text - the backend will handle hashing
+      }),
+    })
+
+    console.log(`Login response status: ${response.status}`)
+    const data = await response.json()
+    console.log("Login response data:", data)
+
+    // Check if the response contains an error message
+    if (!response.ok || data.error) {
+      throw new Error(data.error || "Error logging in")
+    }
+
+    return data
+  } catch (error) {
+    console.error("Login API error:", error)
+    throw error
   }
-
-  return response.json()
 }
 
 // User profile
 export async function getUserProfile(userId: string, token: string) {
-  const response = await fetch(`${API_URL}/api/users/profile`, {
+  const response = await fetch(`${API_URL}/api/users/${userId}/profile`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -55,7 +66,7 @@ export async function getUserProfile(userId: string, token: string) {
 }
 
 export async function updateUserProfile(userId: string, userData: Partial<UserInput>, token: string) {
-  const response = await fetch(`${API_URL}/api/users/profile`, {
+  const response = await fetch(`${API_URL}/api/users/${userId}/profile`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -73,7 +84,7 @@ export async function updateUserProfile(userId: string, userData: Partial<UserIn
 }
 
 export async function deleteUserAccount(userId: string, token: string) {
-  const response = await fetch(`${API_URL}/api/users/account`, {
+  const response = await fetch(`${API_URL}/api/users/${userId}`, {
     method: "DELETE",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -104,7 +115,7 @@ export async function getAllEmployees(token: string) {
   return response.json()
 }
 
-// Skills and certifications
+// Skills
 export async function getUserSkills(userId: string, token: string) {
   const response = await fetch(`${API_URL}/api/users/${userId}/skills`, {
     headers: {
@@ -120,6 +131,7 @@ export async function getUserSkills(userId: string, token: string) {
   return response.json()
 }
 
+// Certifications
 export async function getUserCertifications(userId: string, token: string) {
   const response = await fetch(`${API_URL}/api/users/${userId}/certifications`, {
     headers: {
@@ -135,9 +147,7 @@ export async function getUserCertifications(userId: string, token: string) {
   return response.json()
 }
 
-/**
- * Get user projects/experience
- */
+// Projects
 export async function getUserProjects(userId: string, token: string) {
   const response = await fetch(`${API_URL}/api/users/${userId}/projects`, {
     headers: {
@@ -148,6 +158,79 @@ export async function getUserProjects(userId: string, token: string) {
   if (!response.ok) {
     const error = await response.json()
     throw new Error(error.message || "Error fetching user projects")
+  }
+
+  return response.json()
+}
+
+// Courses
+export async function getUserCourses(userId: string, token: string) {
+  const response = await fetch(`${API_URL}/api/users/${userId}/courses`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || "Error fetching user courses")
+  }
+
+  return response.json()
+}
+
+// Add a new skill
+export async function addUserSkill(userId: string, skillData: Partial<Skill>, token: string) {
+  const response = await fetch(`${API_URL}/api/users/${userId}/skills`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(skillData),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || "Error adding user skill")
+  }
+
+  return response.json()
+}
+
+// Add a new certification
+export async function addUserCertification(userId: string, certData: Partial<Certificado>, token: string) {
+  const response = await fetch(`${API_URL}/api/users/${userId}/certifications`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(certData),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || "Error adding user certification")
+  }
+
+  return response.json()
+}
+
+// Add a new course
+export async function addUserCourse(userId: string, courseData: Partial<Curso>, token: string) {
+  const response = await fetch(`${API_URL}/api/users/${userId}/courses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify(courseData),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || "Error adding user course")
   }
 
   return response.json()

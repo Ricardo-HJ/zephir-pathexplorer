@@ -10,6 +10,7 @@ interface LoginResponse {
   token?: string
   user?: {
     idUsuario: string
+    idTipoUsuario: number
     tipoUsuario: string
     correo: string
   }
@@ -19,7 +20,7 @@ export async function forceRelogin() {
   const cookieStore = await cookies()
   cookieStore.delete("auth_token")
   cookieStore.delete("user_type")
-  cookieStore.delete("user_id") // Added user_id cookie deletion
+  cookieStore.delete("user_id")
   redirect("/")
 }
 
@@ -27,9 +28,10 @@ export async function clearAuthCookies() {
   const cookieStore = await cookies()
   cookieStore.delete("auth_token")
   cookieStore.delete("user_type")
-  cookieStore.delete("user_id") // Added user_id cookie deletion
+  cookieStore.delete("user_id")
 }
 
+// Update the login function to better handle errors
 export async function login(prevState: any, formData: FormData) {
   const correo = formData.get("email") as string
   const contraseña = formData.get("password") as string
@@ -47,61 +49,63 @@ export async function login(prevState: any, formData: FormData) {
     // Use the API service instead of direct fetch
     const data = await loginUser(correo, contraseña)
 
-    if (data.token && data.user) {
-      // Set the token in cookies
-      const cookieStore = await cookies()
-
-      // Calculate expiry if remember me is checked (30 days in seconds)
-      const maxAge = rememberMe ? 30 * 24 * 60 * 60 : undefined
-
-      cookieStore.set("auth_token", data.token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge,
-      })
-
-      // Store user type in a separate cookie for client-side access
-      cookieStore.set("user_type", data.user.tipoUsuario, {
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge,
-      })
-
-      // Store user ID in a separate cookie for client-side access
-      cookieStore.set("user_id", data.user.idUsuario, {
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        path: "/",
-        maxAge,
-      })
-
-      // Determine redirect based on user type
-      let redirectTo = `/${data.user.idUsuario}/dashboard`
-      if (data.user.tipoUsuario === "admin") {
-        redirectTo = "/admin"
-      } else if (data.user.tipoUsuario === "lead") {
-        redirectTo = "/lead"
-      }
-
+    // Check if we have the expected data structure
+    if (!data || !data.token || !data.user) {
+      console.error("Unexpected API response:", data)
       return {
-        success: true,
-        message: "Inicio de sesión exitoso",
-        redirectTo,
+        success: false,
+        message: "Respuesta inesperada del servidor",
       }
+    }
+
+    // Set the token in cookies
+    const cookieStore = await cookies()
+
+    // Calculate expiry if remember me is checked (30 days in seconds)
+    const maxAge = rememberMe ? 30 * 24 * 60 * 60 : undefined
+
+    cookieStore.set("auth_token", data.token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge,
+    })
+
+    // Store user type in a separate cookie for client-side access
+    cookieStore.set("user_type", data.user.tipoUsuario, {
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge,
+    })
+
+    // Store user ID in a separate cookie for client-side access
+    cookieStore.set("user_id", data.user.idUsuario, {
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      path: "/",
+      maxAge,
+    })
+
+    // Determine redirect based on user type
+    let redirectTo = `/${data.user.idUsuario}/dashboard`
+    if (data.user.tipoUsuario === "admin") {
+      redirectTo = "/admin"
+    } else if (data.user.tipoUsuario === "lead") {
+      redirectTo = "/lead"
     }
 
     return {
-      success: false,
-      message: "Error al iniciar sesión",
+      success: true,
+      message: "Inicio de sesión exitoso",
+      redirectTo,
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Login error:", error)
     return {
       success: false,
-      message: "Error de conexión. Intente nuevamente.",
+      message: error.message || "Error de conexión. Intente nuevamente.",
     }
   }
 }
@@ -110,7 +114,7 @@ export async function logout() {
   const cookieStore = await cookies()
   cookieStore.delete("auth_token")
   cookieStore.delete("user_type")
-  cookieStore.delete("user_id") // Added user_id cookie deletion
+  cookieStore.delete("user_id")
   redirect("/")
 }
 

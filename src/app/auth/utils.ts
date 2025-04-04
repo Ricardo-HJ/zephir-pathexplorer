@@ -6,7 +6,8 @@ import { jwtDecode } from "jwt-decode"
 export type User = {
   idUsuario: string
   correo: string
-  tipoUsuario: string
+  idTipoUsuario: number
+  tipoUsuario?: string
   profesion?: string
   nombre?: string
   apellidoP?: string
@@ -16,6 +17,7 @@ export type User = {
   intereses?: string
   descripcion?: string
   created_at?: string
+  updated_at?: string
 }
 
 export async function getCurrentUser(): Promise<User | null> {
@@ -31,7 +33,8 @@ export async function getCurrentUser(): Promise<User | null> {
     const decoded = jwtDecode<{
       idUsuario: string
       correo: string
-      tipoUsuario: string
+      idTipoUsuario: number
+      tipoUsuario?: string
       profesion?: string
       nombre?: string
       apellidoP?: string
@@ -55,6 +58,7 @@ export async function getCurrentUser(): Promise<User | null> {
     return {
       idUsuario: decoded.idUsuario,
       correo: decoded.correo,
+      idTipoUsuario: decoded.idTipoUsuario,
       tipoUsuario: decoded.tipoUsuario,
       profesion: decoded.profesion,
       nombre: decoded.nombre,

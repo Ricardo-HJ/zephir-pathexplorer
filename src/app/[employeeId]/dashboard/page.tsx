@@ -12,12 +12,6 @@ import { useUserProfile } from "@/app/auth/hooks/use-user-profile"
 import { getUserSkills, getUserCertifications, getUserProjects } from "@/services/api"
 import Cookies from "js-cookie"
 
-/**
- * CHANGES:
- * 1. Fixed React import - using useEffect from react
- * 2. Added import for getUserProjects API function
- */
-
 export default function EmployeeProfilePage() {
   // State for expandable sections
   const [expandedItems, setExpandedItems] = useState<{ [key: string]: boolean }>({})
@@ -211,7 +205,7 @@ export default function EmployeeProfilePage() {
               {experience.map((exp, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex justify-between items-start">
-                    <h3 className="font-bold">{exp.role || "Rol no especificado"}</h3>
+                    <h3 className="font-bold">{exp.rolEnProyecto || "Rol no especificado"}</h3>
                     <span className="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">
                       {exp.status || "Completado"}
                     </span>
@@ -221,7 +215,7 @@ export default function EmployeeProfilePage() {
                       <span className="font-medium">Líder:</span> {exp.leader || "No especificado"}
                     </p>
                     <p>
-                      <span className="font-medium">Periodo:</span> {exp.startDate || "N/A"} - {exp.endDate || "N/A"}
+                      <span className="font-medium">Periodo:</span> {exp.fechaInicio || "N/A"} - {exp.fechaFin || "N/A"}
                     </p>
                   </div>
                   <div className="mt-2">
@@ -238,7 +232,7 @@ export default function EmployeeProfilePage() {
                     </button>
                     {isExpanded("description", index) && (
                       <p className="mt-2 text-sm text-gray-600">
-                        {exp.description || "No hay descripción disponible."}
+                        {exp.descripcion || "No hay descripción disponible."}
                       </p>
                     )}
                   </div>
@@ -291,7 +285,7 @@ export default function EmployeeProfilePage() {
               {certifications.map((cert, index) => (
                 <div key={index} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex justify-between items-start">
-                    <h3 className="font-bold">{cert.name || "Certificación sin nombre"}</h3>
+                    <h3 className="font-bold">{cert.nombre || "Certificación sin nombre"}</h3>
                     <span
                       className={`text-xs px-2 py-1 rounded-full ${
                         cert.status === "Aprobado"
@@ -309,7 +303,7 @@ export default function EmployeeProfilePage() {
                       <span className="font-medium">Proveedor:</span> {cert.provider || "No especificado"}
                     </p>
                     <p>
-                      <span className="font-medium">Vence:</span> {cert.expiryDate || "No especificado"}
+                      <span className="font-medium">Vence:</span> {cert.caducidad || "No especificado"}
                     </p>
                   </div>
                 </div>

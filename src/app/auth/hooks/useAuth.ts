@@ -30,7 +30,7 @@ export function useAuth() {
       // Clear cookies on the client side as a fallback
       Cookies.remove("auth_token")
       Cookies.remove("user_type")
-      Cookies.remove("user_id") // Added user_id cookie deletion
+      Cookies.remove("user_id")
 
       // Navigate to login page
       router.push("/")
