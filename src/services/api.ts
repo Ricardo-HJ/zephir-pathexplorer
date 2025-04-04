@@ -29,8 +29,9 @@ export async function loginUser(email: string, password: string) {
       },
       body: JSON.stringify({
         correo: email,
-        contraseña: password, // Send the password as plain text - the backend will handle hashing
+        contraseña: password, // The backend will handle the password comparison with bcrypt
       }),
+      credentials: "include", // Include cookies in the request
     })
 
     console.log(`Login response status: ${response.status}`)
@@ -48,6 +49,7 @@ export async function loginUser(email: string, password: string) {
     throw error
   }
 }
+
 
 // User profile
 export async function getUserProfile(userId: string, token: string) {

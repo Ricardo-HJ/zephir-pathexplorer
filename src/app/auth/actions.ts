@@ -31,7 +31,6 @@ export async function clearAuthCookies() {
   cookieStore.delete("user_id")
 }
 
-// Update the login function to better handle errors
 export async function login(prevState: any, formData: FormData) {
   const correo = formData.get("email") as string
   const contraseña = formData.get("password") as string
