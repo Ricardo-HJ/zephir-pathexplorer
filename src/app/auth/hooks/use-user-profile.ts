@@ -1,10 +1,11 @@
 "use client"
 
+// Add console logs to track token retrieval and API calls
 import { useState, useEffect } from "react"
 import { useAuth } from "@/app/auth/hooks/useAuth"
 import { getUserProfile } from "@/services/api"
 import Cookies from "js-cookie"
-import type { User } from "@/types/user"
+import type { User } from "@/app/auth/utils"
 
 export function useUserProfile(userId?: string) {
   const { userId: currentUserId } = useAuth()
@@ -18,6 +19,7 @@ export function useUserProfile(userId?: string) {
   useEffect(() => {
     async function fetchUserProfile() {
       if (!targetUserId) {
+        console.log("useUserProfile: No targetUserId provided")
         setIsLoading(false)
         return
       }
@@ -25,12 +27,19 @@ export function useUserProfile(userId?: string) {
       try {
         setIsLoading(true)
         const token = Cookies.get("auth_token")
+        console.log(
+          "useUserProfile: Retrieved auth_token from cookies:",
+          token ? "Token exists" : "Token is null or undefined",
+        )
 
         if (!token) {
+          console.log("useUserProfile: No auth_token found in cookies")
           throw new Error("Authentication token not found")
         }
 
+        console.log(`useUserProfile: Fetching profile for user ID: ${targetUserId}`)
         const data = await getUserProfile(targetUserId, token)
+        console.log("useUserProfile: Profile data received:", data)
         setUser(data.user)
         setError(null)
       } catch (err) {

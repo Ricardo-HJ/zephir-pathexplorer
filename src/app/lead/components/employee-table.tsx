@@ -22,14 +22,6 @@ import * as React from "react"
 import { getAllEmployees } from "@/services/api"
 import Cookies from "js-cookie"
 
-/**
- * CHANGES:
- * 1. Removed all mock data - using only API calls
- * 2. Added proper error handling with user-friendly messages
- * 3. Maintained the same UI structure and appearance
- * 4. Added empty state for when no employees are found
- */
-
 // Employee type definition
 interface Employee {
   id: string
