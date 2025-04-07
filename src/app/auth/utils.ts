@@ -35,19 +35,14 @@ export function mapRoleIdToName(roleId: number): string {
 }
 
 export async function getCurrentUser(): Promise<User | null> {
-  console.log("auth/utils: getCurrentUser called")
   const cookieStore = await cookies()
   const token = cookieStore.get("auth_token")?.value
-  console.log("auth/utils: auth_token from cookies:", token ? "Token exists" : "Token not found")
 
   if (!token) {
-    console.log("auth/utils: No auth_token found in cookies")
     return null
   }
 
   try {
-    // Decode the JWT token directly instead of making an API call
-    console.log("auth/utils: Decoding JWT token")
     const decoded = jwtDecode<{
       id_usuario: string
       correo: string
@@ -67,13 +62,7 @@ export async function getCurrentUser(): Promise<User | null> {
 
     // Check if token is expired
     const currentTime = Math.floor(Date.now() / 1000)
-    console.log("auth/utils: Token expiration time:", decoded.exp)
-    console.log("auth/utils: Current time:", currentTime)
-    console.log("auth/utils: Token expired:", decoded.exp < currentTime ? "Yes" : "No")
-
     if (decoded.exp < currentTime) {
-      console.log("auth/utils: Token is expired")
-      // Don't modify cookies here - return null and handle in a Server Action
       return null
     }
 
@@ -81,13 +70,9 @@ export async function getCurrentUser(): Promise<User | null> {
     let userRole = decoded.tipo_usuario
     if (!userRole && decoded.id_tipo_usuario) {
       userRole = mapRoleIdToName(decoded.id_tipo_usuario)
-      console.log("auth/utils: Mapped role ID to name:", decoded.id_tipo_usuario, "->", userRole)
     }
 
-    console.log("auth/utils: Token is valid, returning user data")
-    console.log("auth/utils: User role from token:", userRole)
-
-    // Return user data from the token using snake_case
+    // Return user data from the token using
     return {
       id_usuario: decoded.id_usuario,
       correo: decoded.correo,
@@ -102,19 +87,14 @@ export async function getCurrentUser(): Promise<User | null> {
       descripcion: decoded.descripcion,
     }
   } catch (error) {
-    console.error("auth/utils: Error decoding token:", error)
-    // Don't modify cookies here - return null and handle in a Server Action
     return null
   }
 }
 
 export async function requireAuth() {
-  console.log("auth/utils: requireAuth called")
   const user = await getCurrentUser()
-  console.log("auth/utils: User authenticated:", user ? "Yes" : "No")
 
   if (!user) {
-    console.log("auth/utils: No authenticated user, redirecting to login")
     redirect("/")
   }
 
@@ -122,23 +102,12 @@ export async function requireAuth() {
 }
 
 export async function requireRole(role: string) {
-  console.log(`auth/utils: requireRole called for role: ${role}`)
   const user = await requireAuth()
 
-  console.log("auth/utils: User role:", user.tipo_usuario)
-  console.log("auth/utils: Required role:", role)
-  console.log("auth/utils: Role match:", user.tipo_usuario === role ? "Yes" : "No")
-
   if (user.tipo_usuario !== role) {
-    console.log("auth/utils: Role mismatch, redirecting to unauthorized")
     redirect("/unauthorized")
   }
 
   return user
-}
-
-export async function requireLead() {
-  console.log("auth/utils: requireLead called")
-  return requireRole("lead")
 }
 

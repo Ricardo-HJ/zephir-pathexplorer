@@ -4,6 +4,7 @@
 import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import { loginUser } from "@/services/api"
+import { jwtDecode } from "jwt-decode"
 import { mapRoleIdToName } from "./utils"
 
 interface LoginResponse {
@@ -18,26 +19,90 @@ interface LoginResponse {
   }
 }
 
+export type CurrentUser = {
+  userId: string | null
+  role: string | null
+  token: string | null
+}
+
+export async function getCurrentUser(): Promise<CurrentUser> {
+  try {
+    const cookieStore = cookies()
+    const token = (await cookieStore).get("auth_token")?.value
+    const userType = (await cookieStore).get("user_type")?.value
+    const userId = (await cookieStore).get("user_id")?.value
+
+    console.log("getCurrentUser: Cookies retrieved", {
+      hasToken: !!token,
+      userType,
+      userId,
+    })
+
+    if (token) {
+      try {
+        const decoded = jwtDecode<{
+          id_usuario: string
+          exp: number
+          id_tipo_usuario?: number
+          tipo_usuario?: string
+        }>(token)
+
+        const currentTime = Math.floor(Date.now() / 1000)
+        if (decoded.exp < currentTime) {
+          console.log("getCurrentUser: Token expired")
+          return { userId: null, role: null, token: null }
+        }
+
+        let effectiveRole = userType
+        if (!effectiveRole) {
+          if (decoded.tipo_usuario) {
+            effectiveRole = decoded.tipo_usuario
+          } else if (decoded.id_tipo_usuario) {
+            effectiveRole = mapRoleIdToName(decoded.id_tipo_usuario)
+          }
+        }
+
+        console.log("getCurrentUser: Returning user data", {
+          userId: userId || decoded.id_usuario,
+          role: effectiveRole,
+          token: token,
+        })
+
+        return {
+          userId: userId || decoded.id_usuario,
+          role: effectiveRole ?? null,
+          token,
+        }
+      } catch (error) {
+        console.error("Error decoding token:", error)
+        return { userId: null, role: null, token: null }
+      }
+    }
+
+    console.log("getCurrentUser: No token found, returning null values")
+    return {
+      userId: userId ?? null,
+      role: userType ?? null,
+      token: token ?? null,
+    }
+  } catch (error) {
+    console.error("Error in getCurrentUser:", error)
+    return { userId: null, role: null, token: null }
+  }
+}
+
 export async function forceRelogin() {
-  console.log("auth/actions: Force relogin initiated")
   const cookieStore = await cookies()
-  console.log("auth/actions: Deleting auth_token cookie")
   cookieStore.delete("auth_token")
-  console.log("auth/actions: Deleting user_type cookie")
   cookieStore.delete("user_type")
-  console.log("auth/actions: Deleting user_id cookie")
   cookieStore.delete("user_id")
   redirect("/")
 }
 
 export async function clearAuthCookies() {
-  console.log("auth/actions: Clearing auth cookies")
   const cookieStore = await cookies()
-  console.log("auth/actions: Deleting auth_token cookie")
   cookieStore.delete("auth_token")
-  console.log("auth/actions: Deleting user_type cookie")
   cookieStore.delete("user_type")
-  console.log("auth/actions: Deleting user_id cookie")
   cookieStore.delete("user_id")
 }
 
@@ -89,7 +154,7 @@ export async function login(prevState: any, formData: FormData) {
 
     console.log("auth/actions: Setting auth_token cookie")
     cookieStore.set("auth_token", data.token, {
-      httpOnly: false, // Changed to false so client-side JS can access it
+      httpOnly: true, // Changed to true for security
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
@@ -99,6 +164,7 @@ export async function login(prevState: any, formData: FormData) {
     console.log("auth/actions: Setting user_type cookie:", userRole)
     // Store user type in a separate cookie for client-side access
     cookieStore.set("user_type", userRole, {
+      httpOnly: true, // Changed to true for security
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
@@ -108,6 +174,7 @@ export async function login(prevState: any, formData: FormData) {
     console.log("auth/actions: Setting user_id cookie:", data.user.id_usuario)
     // Store user ID in a separate cookie for client-side access
     cookieStore.set("user_id", data.user.id_usuario, {
+      httpOnly: true, // Changed to true for security
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
@@ -139,13 +206,9 @@ export async function login(prevState: any, formData: FormData) {
 }
 
 export async function logout() {
-  console.log("auth/actions: Server-side logout initiated")
   const cookieStore = await cookies()
-  console.log("auth/actions: Deleting auth_token cookie")
   cookieStore.delete("auth_token")
-  console.log("auth/actions: Deleting user_type cookie")
   cookieStore.delete("user_type")
-  console.log("auth/actions: Deleting user_id cookie")
   cookieStore.delete("user_id")
   redirect("/")
 }

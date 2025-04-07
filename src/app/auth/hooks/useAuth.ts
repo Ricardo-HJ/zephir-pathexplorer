@@ -1,57 +1,106 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import Cookies from "js-cookie"
-import { useRouter } from "next/navigation"
+import { getCurrentUser, logout, type CurrentUser } from "@/app/auth/actions"
 
 export function useAuth() {
-  const [role, setRole] = useState<string | null>(null)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const router = useRouter()
+  const [authState, setAuthState] = useState<{
+    userData: CurrentUser
+    isLoading: boolean
+    error: string | null
+  }>({
+    userData: { userId: null, role: null, token: null },
+    isLoading: true,
+    error: null,
+  })
 
-  useEffect(() => {
-    const userType = Cookies.get("user_type")
-    const userIdFromCookie = Cookies.get("user_id")
+  console.log("useAuth: Initial state:", authState)
 
-    console.log("useAuth: Retrieved cookies - user_type:", userType || "not found")
-    console.log("useAuth: Retrieved cookies - user_id:", userIdFromCookie || "not found")
-
-    setUserId(userIdFromCookie || null)
-    setRole(userType || null)
-    setIsLoading(false)
-  }, [])
-
-  const logout = async () => {
+  // Function to fetch the current user data
+  const fetchUserData = async () => {
+    console.log("useAuth: Fetching user data...")
     try {
-      console.log("useAuth: Logout initiated")
-      // Call the auth API to logout
-      await fetch("/auth/api", {
-        method: "DELETE",
+      const data = await getCurrentUser()
+      console.log("useAuth: User data received:", {
+        userId: data.userId,
+        role: data.role,
+        token: data.token,
       })
 
-      console.log("useAuth: Removing cookies on client side")
-      // Clear cookies on the client side as a fallback
-      Cookies.remove("auth_token")
-      Cookies.remove("user_type")
-      Cookies.remove("user_id")
-
-      // Navigate to login page
-      console.log("useAuth: Redirecting to login page")
-      router.push("/")
+      setAuthState({
+        userData: data,
+        isLoading: false,
+        error: null,
+      })
     } catch (error) {
-      console.error("Logout failed:", error)
+      console.error("useAuth: Error fetching user data:", error)
+      setAuthState((prev) => ({
+        ...prev,
+        isLoading: false,
+        error: error instanceof Error ? error.message : "Failed to fetch user data",
+      }))
     }
   }
 
+  useEffect(() => {
+    console.log("useAuth: Running initial data fetch")
+    fetchUserData()
+  }, [])
+
+  // Handle logout
+  const handleLogout = async () => {
+    try {
+      console.log("useAuth: Logging out...")
+      await logout()
+      setAuthState({
+        userData: { userId: null, role: null, token: null },
+        isLoading: false,
+        error: null,
+      })
+    } catch (error) {
+      console.error("useAuth: Logout error:", error)
+    }
+  }
+
+  // Refresh auth state
+  const refreshAuth = () => {
+    console.log("useAuth: Refreshing auth state")
+    setAuthState((prev) => ({ ...prev, isLoading: true }))
+    fetchUserData()
+  }
+
+  // Derived properties
+  const isAuthenticated = !!authState.userData.token
+  const isAdmin = authState.userData.role === "admin"
+  const isLead = authState.userData.role === "lead"
+  const isEmployee = authState.userData.role === "employee"
+
+  console.log("useAuth: Final state:", {
+    userId: authState.userData.userId,
+    role: authState.userData.role,
+    hasToken: !!authState.userData.token,
+    isLoading: authState.isLoading,
+  })
+
   return {
-    role,
-    userId,
-    isLoading,
-    isAdmin: role === "admin",
-    isLead: role === "lead",
-    isEmployee: role === "employee",
-    logout,
+    // User data
+    userId: authState.userData.userId,
+    role: authState.userData.role,
+    token: authState.userData.token,
+
+    // Status
+    isLoading: authState.isLoading,
+    error: authState.error,
+
+    // Derived properties
+    isAuthenticated,
+    isAdmin,
+    isLead,
+    isEmployee,
+
+    // Actions
+    logout: handleLogout,
+    refreshAuth,
   }
 }
 
