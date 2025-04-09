@@ -183,11 +183,6 @@ export async function login(prevState: any, formData: FormData) {
 
     // Determine redirect based on user type
     let redirectTo = `/${data.user.id_usuario}/dashboard`
-    if (userRole === "admin") {
-      redirectTo = "/admin"
-    } else if (userRole === "lead") {
-      redirectTo = "/lead"
-    }
 
     console.log("auth/actions: Redirect path:", redirectTo)
 
