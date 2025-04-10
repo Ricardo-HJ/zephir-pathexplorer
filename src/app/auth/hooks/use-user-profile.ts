@@ -17,13 +17,11 @@ export function useUserProfile(userId?: string) {
   useEffect(() => {
     async function fetchUserProfile() {
       if (!targetUserId) {
-        console.log("useUserProfile: No targetUserId provided")
         setIsLoading(false)
         return
       }
 
       if (!token) {
-        console.log("useUserProfile: No auth token available")
         setError("Authentication token not found")
         setIsLoading(false)
         return
@@ -31,9 +29,7 @@ export function useUserProfile(userId?: string) {
 
       try {
         setIsLoading(true)
-        console.log(`useUserProfile: Fetching profile for user ID: ${targetUserId}`)
         const data = await getUserProfile(targetUserId, token)
-        console.log("useUserProfile: Profile data received:", data)
         setUser(data.user)
         setError(null)
       } catch (err) {

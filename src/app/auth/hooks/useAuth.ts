@@ -14,18 +14,10 @@ export function useAuth() {
     error: null,
   })
 
-  console.log("useAuth: Initial state:", authState)
-
   // Function to fetch the current user data
   const fetchUserData = async () => {
-    console.log("useAuth: Fetching user data...")
     try {
       const data = await getCurrentUser()
-      console.log("useAuth: User data received:", {
-        userId: data.userId,
-        role: data.role,
-        token: data.token,
-      })
 
       setAuthState({
         userData: data,
@@ -43,14 +35,12 @@ export function useAuth() {
   }
 
   useEffect(() => {
-    console.log("useAuth: Running initial data fetch")
     fetchUserData()
   }, [])
 
   // Handle logout
   const handleLogout = async () => {
     try {
-      console.log("useAuth: Logging out...")
       await logout()
       setAuthState({
         userData: { userId: null, role: null, token: null },
@@ -64,7 +54,6 @@ export function useAuth() {
 
   // Refresh auth state
   const refreshAuth = () => {
-    console.log("useAuth: Refreshing auth state")
     setAuthState((prev) => ({ ...prev, isLoading: true }))
     fetchUserData()
   }
@@ -74,13 +63,6 @@ export function useAuth() {
   const isAdmin = authState.userData.role === "admin"
   const isLead = authState.userData.role === "lead"
   const isEmployee = authState.userData.role === "employee"
-
-  console.log("useAuth: Final state:", {
-    userId: authState.userData.userId,
-    role: authState.userData.role,
-    hasToken: !!authState.userData.token,
-    isLoading: authState.isLoading,
-  })
 
   return {
     // User data
