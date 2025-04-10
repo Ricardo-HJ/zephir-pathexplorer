@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation"
 import { CustomButton } from "@/components/ui/button"
-import Image from "next/image"
+import { CareerMainBackground } from "@/components/ui/backgrounds"
 
 export default function CareerPage() {
   const router = useRouter()
@@ -14,9 +14,9 @@ export default function CareerPage() {
 
   return (
     <div className="fixed inset-0 z-50 w-screen h-screen overflow-hidden">
-      {/* Background image using the same approach as sidebar */}
+      {/* Background using SVG component */}
       <div className="absolute inset-0">
-        <Image src="/career_shapes_bg.png" alt="Background" fill className="object-contain opacity-100" priority />
+        <CareerMainBackground />
       </div>
 
       {/* Content overlay */}
