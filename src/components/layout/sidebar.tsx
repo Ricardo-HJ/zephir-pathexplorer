@@ -4,6 +4,15 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { useState } from "react"
 import { useAuth } from "@/app/auth/hooks/useAuth"
+import {
+  HomeIcon,
+  CareerIcon,
+  EducationIcon,
+  TeamsIcon,
+  ChartsIcon,
+  SettingsIcon,
+  LogoutIcon,
+} from "@/components/ui/icons"
 
 type IconIdKeys = "Inicio" | "Carrera" | "Habilidades" | "Proyectos" | "Analisis" | "Ajustes" | "Cerrar sesion"
 
@@ -18,33 +27,38 @@ export function AppSidebar() {
       name: "Inicio",
       path: `/${userId}/dashboard`
     },
-    { 
-      name: "Carrera", 
-      path: `/${userId}/carrera` 
+    {
+      name: "Carrera",
+      path: `/${userId}/carrera`,
     },
-    { 
-      name: "Habilidades", 
-      path: `/${userId}/habilidades` 
+    {
+      name: "Habilidades",
+      path: `/${userId}/habilidades`,
     },
-    { 
-      name: "Proyectos", 
-      path: `/${userId}/proyectos`
+    {
+      name: "Proyectos",
+      path: `/${userId}/proyectos`,
     },
-    { 
-      name: "Analisis", 
-      path: `/${userId}/analisis`
+    {
+      name: "Analisis",
+      path: `/${userId}/analisis`,
     },
   ]
 
-  // Icon mapping (Spanish name to icon ID)
-  const iconIds: Record<IconIdKeys, string> = {
-    Inicio: "icon-home",
-    Carrera: "icon-carrer",
-    Habilidades: "icon-education",
-    Proyectos: "icon-teams",
-    Analisis: "icon-charts",
-    Ajustes: "icon-setting",
-    "Cerrar sesion": "icon-logout",
+  // Icon mapping (Spanish name to icon component)
+  const getIconComponent = (name: IconIdKeys) => {
+    const iconMap = {
+      Inicio: HomeIcon,
+      Carrera: CareerIcon,
+      Habilidades: EducationIcon,
+      Proyectos: TeamsIcon,
+      Analisis: ChartsIcon,
+      Ajustes: SettingsIcon,
+      "Cerrar sesion": LogoutIcon,
+    }
+
+    const IconComponent = iconMap[name]
+    return IconComponent
   }
 
   // Footer items with Spanish names
@@ -84,7 +98,14 @@ export function AppSidebar() {
       <nav className="flex-1 flex flex-col items-start px-3 gap-4 py-4">
         {navItems.map((item) => {
           // Check if the current path matches this nav item
-          const isActive = pathname.includes(item.path.split('/').pop() || '') || (item.name === "Inicio" && pathname.includes("dashboard"))
+          const isActive =
+            pathname.includes(item.path.split("/").pop() || "") ||
+            (item.name === "Inicio" && pathname.includes("dashboard")) ||
+            (item.name === "Inicio" && pathname === "/lead") ||
+            (item.name === "Inicio" && pathname === "/admin")
+
+          const IconComponent = getIconComponent(item.name)
+
           return (
             <Link
               key={item.name}
@@ -97,9 +118,7 @@ export function AppSidebar() {
               title={item.name}
             >
               <div className={`w-5 h-5 flex items-center justify-center ${isActive ? "text-black" : "text-gray-500"}`}>
-                <svg className="w-4 h-4" aria-hidden="true">
-                  <use href={`/sprite.svg#${iconIds[item.name]}`} />
-                </svg>
+                <IconComponent size="sm" className={isActive ? "text-black" : "text-gray-500"} />
               </div>
               {isExpanded && (
                 <span className={`ml-3 ${isActive ? "text-black font-medium" : "text-gray-500"}`}>{item.name}</span>
@@ -112,6 +131,8 @@ export function AppSidebar() {
       {/* Footer navigation */}
       <div className="flex flex-col items-start px-3 gap-4 py-8 mt-auto">
         {footerItems.map((item) => {
+          const IconComponent = getIconComponent(item.name)
+
           // Special handling for logout
           if (item.name === "Cerrar sesion") {
             return (
@@ -125,9 +146,7 @@ export function AppSidebar() {
                 title={item.name}
               >
                 <div className="w-5 h-5 flex items-center justify-center text-gray-500">
-                  <svg className="w-4 h-4" aria-hidden="true">
-                    <use href={`/sprite.svg#${iconIds[item.name]}`} />
-                  </svg>
+                  <IconComponent size="sm" className="text-gray-500" />
                 </div>
                 {isExpanded && <span className="ml-3 text-gray-500">{item.name}</span>}
               </button>
@@ -146,9 +165,7 @@ export function AppSidebar() {
               title={item.name}
             >
               <div className="w-5 h-5 flex items-center justify-center text-gray-500">
-                <svg className="w-4 h-4" aria-hidden="true">
-                  <use href={`/sprite.svg#${iconIds[item.name]}`} />
-                </svg>
+                <IconComponent size="sm" className="text-gray-500" />
               </div>
               {isExpanded && <span className="ml-3 text-gray-500">{item.name}</span>}
             </Link>

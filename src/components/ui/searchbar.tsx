@@ -3,6 +3,7 @@
 import React, { useState, useRef, useCallback } from "react"
 import { CustomInput, type CustomInputProps } from "./input"
 import { debounce } from "@/lib/utils"
+import { SearchIcon, XIcon } from "@/components/ui/icons"
 
 export interface CustomSearchbarProps extends Omit<CustomInputProps, "onChange"> {
   onSearch?: (searchTerm: string) => void
@@ -71,6 +72,8 @@ const CustomSearchbar = React.forwardRef<HTMLInputElement, CustomSearchbarProps>
         iconRight={searchTerm ? "icon-x" : undefined}
         onIconRightClick={searchTerm ? handleClear : undefined}
         placeholder={placeholder}
+        renderIconLeft={() => <SearchIcon className="text-gray-500" />}
+        renderIconRight={searchTerm ? () => <XIcon className="text-gray-500" /> : undefined}
         {...props}
       />
     )

@@ -73,7 +73,6 @@ export default function LoginPage() {
                 type="email"
                 label="Correo"
                 placeholder="correo@ejemplo.com"
-                iconLeft="icon-mail"
                 disabled={isPending}
                 required
               />

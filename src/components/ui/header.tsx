@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils"
 import { CustomButton } from "./button"
 import { CustomSearchbar } from "./searchbar"
 import { CustomTabMenu, type TabItem } from "./tab-menu"
+import { FilterIcon } from "@/components/ui/icons"
 
 export interface BreadcrumbItem {
   label: string
@@ -106,9 +107,7 @@ export function PageHeader({
                   className="p-2 rounded-md hover:bg-gray-200 transition-colors"
                   aria-label="Filter"
                 >
-                  <svg className="w-6 h-6 text-gray-500">
-                    <use href="/sprite.svg#icon-filter" />
-                  </svg>
+                  <FilterIcon className="text-gray-500" />
                 </button>
               )}
             </div>
@@ -119,7 +118,6 @@ export function PageHeader({
                 {actions.map((action, index) => (
                   <CustomButton
                     key={index}
-                    size={"sm"}
                     variant={action.variant || "purple"}
                     iconName={action.icon}
                     loading={action.loading}

@@ -3,6 +3,7 @@
 import React, { useId } from "react"
 import { cva } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { getIconByName } from "@/components/ui/icons"
 
 const inputWrapperVariants = cva("flex flex-col w-full", {
   variants: {
@@ -60,6 +61,8 @@ export interface CustomInputProps extends Omit<React.InputHTMLAttributes<HTMLInp
   labelClassName?: string
   inputClassName?: string
   errorClassName?: string
+  renderIconRight?: () => React.ReactNode
+  renderIconLeft?: () => React.ReactNode
 }
 
 const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
@@ -79,12 +82,18 @@ const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
       errorClassName,
       id,
       disabled,
+      renderIconRight,
+      renderIconLeft,
       ...props
     },
     ref,
   ) => {
     const inputId = useId()
     const finalId = id || inputId
+
+    // Get icon components
+    const IconLeft = iconLeft ? getIconByName(iconLeft) : null
+    const IconRight = iconRight ? getIconByName(iconRight) : null
 
     return (
       <div className={cn(inputWrapperVariants({ fullWidth }), wrapperClassName)}>
@@ -99,9 +108,7 @@ const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
               className={cn("absolute left-4 top-1/2 -translate-y-1/2", onIconLeftClick && "cursor-pointer")}
               onClick={onIconLeftClick}
             >
-              <svg className="w-[24px] h-[24px] text-gray-500">
-                <use href={`/sprite.svg#${iconLeft}`} />
-              </svg>
+              {renderIconLeft ? renderIconLeft() : IconLeft ? <IconLeft className="text-gray-500" /> : null}
             </div>
           )}
           <input
@@ -116,9 +123,7 @@ const CustomInput = React.forwardRef<HTMLInputElement, CustomInputProps>(
               className={cn("absolute right-4 top-1/2 -translate-y-1/2", onIconRightClick && "cursor-pointer")}
               onClick={onIconRightClick}
             >
-              <svg className="w-[24px] h-[24px] text-gray-500">
-                <use href={`/sprite.svg#${iconRight}`} />
-              </svg>
+              {renderIconRight ? renderIconRight() : IconRight ? <IconRight className="text-gray-500" /> : null}
             </div>
           )}
         </div>

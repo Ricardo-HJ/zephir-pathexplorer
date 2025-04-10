@@ -5,6 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
+import { getIconByName } from "@/components/ui/icons"
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none",
@@ -44,7 +45,7 @@ const buttonVariants = cva(
       {
         buttonType: "text",
         size: "lg",
-        className: "py-[10px] px-[24px]",
+        className: "py-[12px] px-[24px]",
       },
       // Icon only buttons
       {
@@ -86,30 +87,6 @@ const buttonVariants = cva(
     },
   },
 )
-
-// Icon component that uses the SVG sprite system
-const Icon = ({
-  name,
-  size = "md",
-  className,
-  ...props
-}: {
-  name: string
-  size?: "sm" | "md" | "lg"
-  className?: string
-} & React.SVGProps<SVGSVGElement>) => {
-  const sizeMap = {
-    sm: "w-[16px] h-[16px]",
-    md: "w-[24px] h-[24px]",
-    lg: "w-[30px] h-[30px]",
-  }
-
-  return (
-    <svg className={cn(sizeMap[size], className)} {...props}>
-      <use href={`/sprite.svg#${name}`} />
-    </svg>
-  )
-}
 
 export type ButtonActionType =
   | { type: "button"; onClick?: React.MouseEventHandler<HTMLButtonElement> }
@@ -156,8 +133,8 @@ const CustomButton = React.forwardRef<HTMLButtonElement, CustomButtonProps>(
       effectiveButtonType = "text"
     }
 
-    // Determine icon color based on variant
-    const iconColorClass = variant === "white" || variant === "transparent" ? "text-[#272329]" : "text-white"
+    // Get the icon component if iconName is provided
+    const IconComponent = iconName ? getIconByName(iconName) : null
 
     // Common content for all button types
     const buttonContent = (
@@ -177,9 +154,17 @@ const CustomButton = React.forwardRef<HTMLButtonElement, CustomButtonProps>(
             ></path>
           </svg>
         )}
-        {iconName && iconPosition === "left" && <Icon name={iconName} size={size ?? undefined} className={iconColorClass} />}
+        {iconName && iconPosition === "left" && IconComponent && (
+          <IconComponent
+            className={variant === "white" || variant === "transparent" ? "text-[#272329]" : "text-white"}
+          />
+        )}
         {children}
-        {iconName && iconPosition === "right" && <Icon name={iconName} size={size ?? undefined} className={iconColorClass} />}
+        {iconName && iconPosition === "right" && IconComponent && (
+          <IconComponent
+            className={variant === "white" || variant === "transparent" ? "text-[#272329]" : "text-white"}
+          />
+        )}
       </>
     )
 

@@ -2,6 +2,7 @@
 
 import React, { useState } from "react"
 import { CustomInput, type CustomInputProps } from "./input"
+import { EyeIcon, EyeOffIcon } from "@/components/ui/icons"
 
 export interface CustomPasswordInputProps extends CustomInputProps {}
 
@@ -19,6 +20,9 @@ const CustomPasswordInput = React.forwardRef<HTMLInputElement, CustomPasswordInp
       ref={ref}
       {...props}
       onIconRightClick={togglePasswordVisibility}
+      renderIconRight={() =>
+        showPassword ? <EyeOffIcon className="text-gray-500" /> : <EyeIcon className="text-gray-500" />
+      }
     />
   )
 })
