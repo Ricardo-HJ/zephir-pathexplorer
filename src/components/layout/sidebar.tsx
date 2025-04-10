@@ -16,27 +16,23 @@ export function AppSidebar() {
   const navItems: { name: IconIdKeys; path: string }[] = [
     {
       name: "Inicio",
-      path: isLead 
-        ? "/lead" 
-        : isEmployee 
-          ? `/${userId}/dashboard` 
-          : "/admin",
+      path: `/${userId}/dashboard`
     },
     { 
       name: "Carrera", 
-      path: "/carrer" 
+      path: `/${userId}/carrera` 
     },
     { 
       name: "Habilidades", 
-      path: `/${userId}/learning` 
+      path: `/${userId}/habilidades` 
     },
     { 
       name: "Proyectos", 
-      path: "/team" 
+      path: `/${userId}/proyectos`
     },
     { 
       name: "Analisis", 
-      path: "/reports" 
+      path: `/${userId}/analisis`
     },
   ]
 
@@ -88,11 +84,7 @@ export function AppSidebar() {
       <nav className="flex-1 flex flex-col items-start px-3 gap-4 py-4">
         {navItems.map((item) => {
           // Check if the current path matches this nav item
-          const isActive = pathname.includes(item.path.split('/').pop() || '') || 
-                          (item.name === "Inicio" && pathname.includes("dashboard")) ||
-                          (item.name === "Inicio" && pathname === "/lead") ||
-                          (item.name === "Inicio" && pathname === "/admin")
-
+          const isActive = pathname.includes(item.path.split('/').pop() || '') || (item.name === "Inicio" && pathname.includes("dashboard"))
           return (
             <Link
               key={item.name}

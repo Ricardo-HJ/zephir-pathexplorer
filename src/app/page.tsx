@@ -7,6 +7,9 @@ import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect } from "react"
 import { login } from "@/app/auth/actions"
 import { Loader2 } from "lucide-react"
+import { CustomInput } from "@/components/ui/input"
+import { CustomPasswordInput } from "@/components/ui/password-input"
+import { CustomButton } from "@/components/ui/button"
 
 export default function LoginPage() {
   const router = useRouter()
@@ -64,32 +67,26 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-2">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                Correo
-              </label>
-              <input
+              <CustomInput
                 id="email"
                 name="email"
                 type="email"
+                label="Correo"
                 placeholder="correo@ejemplo.com"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                required
+                iconLeft="icon-mail"
                 disabled={isPending}
+                required
               />
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                Contraseña
-              </label>
-              <input
+              <CustomPasswordInput
                 id="password"
                 name="password"
-                type="password"
+                label="Contraseña"
                 placeholder=""
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                required
                 disabled={isPending}
+                required
               />
             </div>
 
@@ -99,7 +96,7 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 border-gray-300 rounded"
+                  className="h-4 w-4 border-gray-300 rounded text-[#a100ff] focus:ring-[#a100ff]"
                   disabled={isPending}
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
@@ -114,10 +111,12 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <button
-              type="submit"
+            <CustomButton
               disabled={isPending}
-              className="w-full py-3 px-4 bg-accenture-dark text-white font-medium rounded-md hover:bg-accenture-dark/90 flex justify-center items-center"
+              variant="purple"
+              size="sm"
+              className="w-full"
+              action={{ type: "submit" }}
             >
               {isPending ? (
                 <>
@@ -127,7 +126,7 @@ export default function LoginPage() {
               ) : (
                 "Iniciar sesión"
               )}
-            </button>
+            </CustomButton>
           </form>
         </div>
       </div>
@@ -140,4 +139,3 @@ export default function LoginPage() {
     </div>
   )
 }
-
