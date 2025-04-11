@@ -3,13 +3,15 @@ import { cn } from "@/lib/utils"
 
 interface IconProps extends React.SVGProps<SVGSVGElement> {
   className?: string
-  size?: "sm" | "md" | "lg"
+  size?: "sm" | "md" | "lg" | "mxl" | "xl"
 }
 
 const sizeMap = {
   sm: "w-4 h-4",
   md: "w-5 h-5",
   lg: "w-6 h-6",
+  mxl: "w20- h-20",
+  xl: "w-25 h-25",
 }
 
 // Eye icon
@@ -28,6 +30,50 @@ export const EyeIcon = ({ className, size = "md", ...props }: IconProps) => (
     <path d="M11.9998 20.2707C15.5298 20.2707 18.8198 18.1907 21.1098 14.5907C22.0098 13.1807 22.0098 10.8107 21.1098 9.4007C18.8198 5.8007 15.5298 3.7207 11.9998 3.7207C8.46984 3.7207 5.17984 5.8007 2.88984 9.4007C1.98984 10.8107 1.98984 13.1807 2.88984 14.5907C5.17984 18.1907 8.46984 20.2707 11.9998 20.2707Z" />
   </svg>
 )
+
+// target icon
+export const TargetIcon = ({ className, size = "mxl", ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(sizeMap[size], className)}
+    {...props}
+  >
+    <circle cx="12" cy="12" r="10" />
+    <circle cx="12" cy="12" r="6" />
+    <circle cx="12" cy="12" r="2" />
+  </svg>
+)
+
+// priority icon
+export const PriorityIcon = ({ className, size = "xl", ...props }: IconProps) => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    width="24"
+    height="24"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={cn(sizeMap[size], className)}
+    {...props}
+  >
+    <path d="M10 12h11" />
+    <path d="M10 18h11" />
+    <path d="M10 6h11" />
+    <path d="M4 10h2" />
+    <path d="M4 6h1v4" />
+    <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1" />
+  </svg>
+);
+
 
 // Eye-off icon
 export const EyeOffIcon = ({ className, size = "md", ...props }: IconProps) => (
@@ -264,6 +310,8 @@ export const getIconByName = (name: string) => {
     "icon-search": SearchIcon,
     "icon-x": XIcon,
     "icon-filter": FilterIcon,
+    "icon-target": TargetIcon,
+    "icon-priority": PriorityIcon,
   }
 
   return icons[name] || null

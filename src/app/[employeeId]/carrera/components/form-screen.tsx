@@ -1,6 +1,6 @@
 "use client"
 
-import type React from "react"
+import React from "react"
 
 import { useState, type KeyboardEvent } from "react"
 import { CustomButton } from "@/components/ui/button"
@@ -106,10 +106,14 @@ export default function FormScreen({ onNext, onSkip }: FormScreenProps) {
                     <div className="w-full max-w-6xl flex gap-12">
                         {/* Priorities Section */}
                         <section className="space-y-4">
-                            <div className="flex justify-center mb-4">
-
+                            <div className="flex items-center justify-center gap-1 mb-1">
+                              {getIconByName("icon-priority") && (
+                                <div className="text-gray-600">
+                                  {React.createElement(getIconByName("icon-priority"))}
+                                </div>
+                              )}
                             </div>
-                            <h2 className="text-2xl font-semibold text-gray-800">Prioridades</h2>
+                            <h2 className="text-2xl font-bold text-gray-800">Prioridades</h2>
                             <p className="text-gray-600">¿Qué aspectos son más importantes para ti en tu carrera profesional?</p>
 
                             <div className="flex gap-2">
@@ -140,7 +144,14 @@ export default function FormScreen({ onNext, onSkip }: FormScreenProps) {
 
                         {/* Objectives Section */}
                         <section className="space-y-4">
-                            <h2 className="text-2xl font-semibold text-gray-800">Objetivos</h2>
+                            <div className="flex items-center justify-center gap-1 mb-1">
+                              {getIconByName("icon-target") && (
+                                <div className="text-gray-600">
+                                  {React.createElement(getIconByName("icon-target"))}
+                                </div>
+                              )}
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-800">Objetivos</h2>
                             <p className="text-gray-600">¿Cuáles son tus metas profesionales a corto, mediano y largo plazo?</p>
 
                             <div className="flex gap-2">
@@ -171,7 +182,7 @@ export default function FormScreen({ onNext, onSkip }: FormScreenProps) {
 
                         {/* Interests Section */}
                         <section className="space-y-4">
-                            <h2 className="text-2xl font-semibold text-gray-800">Intereses</h2>
+                            <h2 className="text-2xl font-bold text-gray-800">Intereses</h2>
                             <p className="text-gray-600">¿Qué áreas o tecnologías te interesan más en tu campo profesional?</p>
 
                             <div className="flex gap-2">
