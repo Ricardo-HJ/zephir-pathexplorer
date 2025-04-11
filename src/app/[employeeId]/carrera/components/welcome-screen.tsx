@@ -34,10 +34,10 @@ export default function CareerPage({ onNext }: WelcomeScreenProps) {
 
       {/* Content overlay */}
       <div className="relative z-20 h-full w-full flex items-center justify-center">
-        <div className="text-center px-4 max-w-3xl">
+        <div className="text-center px-4 max-w">
           <h1 className="text-5xl font-bold text-white mb-6">¡ Define tu trayectoria profesional !</h1>
 
-          <p className="text-white text-xl mb-12">
+          <p className="text-white text-xl mb-12 max-w-2xl m-auto">
             Personaliza tu camino según lo que te motiva, lo que quieres lograr y lo que más valoras en tu carrera.
           </p>
 
