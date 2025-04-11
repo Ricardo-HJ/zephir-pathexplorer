@@ -69,7 +69,7 @@ export function AppSidebar() {
 
   return (
     <aside
-      className={`fixed left-0 top-0 h-screen ${isExpanded ? "w-64" : "w-16"} flex flex-col bg-[#ffffff] border-r border-gray-200 z-10 transition-all duration-300 ease-in-out`}
+      className={`z-50 fixed left-0 top-0 h-screen ${isExpanded ? "w-64" : "w-16"} flex flex-col bg-[#ffffff] border-r border-gray-200 z-10 transition-all duration-300 ease-in-out`}
       onMouseEnter={() => setIsExpanded(true)}
       onMouseLeave={() => setIsExpanded(false)}
     >

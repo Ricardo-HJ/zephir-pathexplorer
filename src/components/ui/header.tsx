@@ -17,6 +17,7 @@ export interface ActionButton {
   label: string
   variant?: "purple" | "dark" | "white" | "red" | "green" | "transparent"
   icon?: string
+  size?: "small" | "medium" | "large"
   onClick: () => void
   loading?: boolean
   requireConfirmation?: boolean
@@ -120,6 +121,7 @@ export function PageHeader({
                     key={index}
                     variant={action.variant || "purple"}
                     iconName={action.icon}
+                    size={"sm"}
                     loading={action.loading}
                     action={{
                       type: "function",

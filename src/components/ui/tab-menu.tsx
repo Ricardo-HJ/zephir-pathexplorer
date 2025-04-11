@@ -50,7 +50,7 @@ export function CustomTabMenu({ tabs, activeTab, onTabChange, className, ...prop
   }
 
   return (
-    <div className={cn("flex items-center p-3 gap-2 bg-white rounded-full", className)} {...props}>
+    <div className={cn("flex items-center p-3 gap-2 bg-white rounded-full w-max", className)} {...props}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id
         const isHovered = hoveredTab === tab.id
